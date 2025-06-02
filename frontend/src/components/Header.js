@@ -1,120 +1,154 @@
-// src/components/Header.js - ☕️削除済み
 import React, { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import LoginForm from './auth/LoginForm';
-import SignUpForm from './auth/SignUpForm';
+import { useNavigate } from 'react-router-dom';
 import './Header.css';
 
 const Header = () => {
-  const { currentUser, logout } = useAuth();
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [authMode, setAuthMode] = useState('login'); // 'login' or 'signup'
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const navigate = useNavigate();
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-    } catch (error) {
-      console.error('ログアウトエラー:', error);
-    }
+  // 認証ユーザーのモックデータ（実際はAuthContextから取得）
+  const currentUser = {
+    displayName: "テスト太郎",
+    email: "oo00mixan00oo@icloud.com",
+    userType: "guest"
   };
 
-  const openLoginModal = () => {
-    setAuthMode('login');
-    setShowAuthModal(true);
+  const isLoggedIn = !!currentUser;
+
+  const handleDropdownToggle = () => {
+    setDropdownOpen(!dropdownOpen);
   };
 
-  const openSignUpModal = () => {
-    setAuthMode('signup');
-    setShowAuthModal(true);
+  const handleMenuClick = (path) => {
+    setDropdownOpen(false);
+    navigate(path);
   };
 
-  const closeModal = () => {
-    setShowAuthModal(false);
-  };
-
-  const switchToSignUp = () => {
-    setAuthMode('signup');
-  };
-
-  const switchToLogin = () => {
-    setAuthMode('login');
+  const handleLogout = () => {
+    setDropdownOpen(false);
+    // ログアウト処理（実際はAuthContextのlogout関数を使用）
+    alert('ログアウトしました');
+    window.location.href = '/';
   };
 
   return (
-    <>
-      <header className="app-header">
-        <div className="header-content">
-          <div className="header-left">
-            <h1>サンタナゲストハウス</h1>
-          </div>
-          
-          <nav className="header-nav">
-            <ul>
-              <li><a href="/">ホーム</a></li>
-              <li><a href="/about">施設案内</a></li>
-              <li><a href="/contact">お問い合わせ</a></li>
-            </ul>
-          </nav>
-
-          <div className="header-auth">
-            {currentUser ? (
-              <div className="user-menu">
-                <span className="user-greeting">
-                  {currentUser.displayName || 'ゲスト'}さん
-                </span>
-                <button 
-                  onClick={handleLogout}
-                  className="logout-btn"
-                >
-                  ログアウト
-                </button>
-              </div>
-            ) : (
-              <div className="auth-buttons">
-                <button 
-                  onClick={openLoginModal}
-                  className="login-btn"
-                >
-                  ログイン
-                </button>
-                <button 
-                  onClick={openSignUpModal}
-                  className="signup-btn"
-                >
-                  新規登録
-                </button>
-              </div>
-            )}
-          </div>
+    <header className="header">
+      <div className="header-content">
+        <div className="logo" onClick={() => navigate('/')}>
+          <h1>サンタナゲストハウス</h1>
         </div>
-      </header>
+        
+        <nav className="nav-menu">
+          <ul className="nav-links">
+            <li><a href="/">ホーム</a></li>
+            <li><a href="/about">施設案内</a></li>
+            <li><a href="/contact">お問い合わせ</a></li>
+          </ul>
+        </nav>
 
-      {/* 認証モーダル */}
-      {showAuthModal && (
-        <div className="modal-overlay" onClick={closeModal}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <button 
-              className="modal-close"
-              onClick={closeModal}
-            >
-              ×
-            </button>
-            
-            {authMode === 'login' ? (
-              <LoginForm 
-                onSwitchToSignUp={switchToSignUp}
-                onClose={closeModal}
-              />
-            ) : (
-              <SignUpForm 
-                onSwitchToLogin={switchToLogin}
-                onClose={closeModal}
-              />
-            )}
-          </div>
+        <div className="auth-section">
+          {isLoggedIn ? (
+            <div className="user-menu-container">
+              <div 
+                className="user-menu-trigger"
+                onMouseEnter={() => setDropdownOpen(true)}
+                onMouseLeave={() => setDropdownOpen(false)}
+              >
+                {/* ユーザーアバター */}
+                <div className="user-avatar">
+                  {currentUser.displayName?.charAt(0) || 'U'}
+                </div>
+                
+                {/* ユーザー名 */}
+                <span className="user-name">{currentUser.displayName}</span>
+                
+                {/* ドロップダウン矢印 */}
+                <span className="dropdown-arrow">▼</span>
+
+                {/* ドロップダウンメニュー */}
+                {dropdownOpen && (
+                  <div className="dropdown-menu">
+                    <div className="dropdown-header">
+                      <div className="dropdown-user-info">
+                        <div className="dropdown-avatar">
+                          {currentUser.displayName?.charAt(0) || 'U'}
+                        </div>
+                        <div className="dropdown-details">
+                          <div className="dropdown-name">{currentUser.displayName}</div>
+                          <div className="dropdown-email">{currentUser.email}</div>
+                          <div className="dropdown-type">お客様</div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="dropdown-divider"></div>
+                    
+                    <div className="dropdown-items">
+                      <button 
+                        className="dropdown-item"
+                        onClick={() => handleMenuClick('/dashboard')}
+                      >
+                        <span className="dropdown-icon">👤</span>
+                        ユーザー情報
+                      </button>
+                      
+                      <button 
+                        className="dropdown-item"
+                        onClick={() => handleMenuClick('/dashboard')}
+                      >
+                        <span className="dropdown-icon">📅</span>
+                        予約確認
+                      </button>
+                      
+                      <button 
+                        className="dropdown-item"
+                        onClick={() => handleMenuClick('/dashboard')}
+                      >
+                        <span className="dropdown-icon">📋</span>
+                        予約履歴
+                      </button>
+                      
+                      <button 
+                        className="dropdown-item"
+                        onClick={() => handleMenuClick('/dashboard')}
+                      >
+                        <span className="dropdown-icon">⭐</span>
+                        お気に入り
+                      </button>
+                      
+                      <button 
+                        className="dropdown-item"
+                        onClick={() => handleMenuClick('/')}
+                      >
+                        <span className="dropdown-icon">🏠</span>
+                        新規予約
+                      </button>
+                    </div>
+                    
+                    <div className="dropdown-divider"></div>
+                    
+                    <div className="dropdown-footer">
+                      <button 
+                        className="dropdown-item logout-item"
+                        onClick={handleLogout}
+                      >
+                        <span className="dropdown-icon">🚪</span>
+                        ログアウト
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="auth-buttons">
+              <button className="login-btn">ログイン</button>
+              <button className="signup-btn">新規登録</button>
+            </div>
+          )}
         </div>
-      )}
-    </>
+      </div>
+    </header>
   );
 };
 

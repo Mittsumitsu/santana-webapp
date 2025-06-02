@@ -1,0 +1,578 @@
+/* UserDashboard.css - 実データ読み込み対応版 */
+
+.user-dashboard {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #f8f9fa;
+    min-height: 100vh;
+  }
+  
+  /* ヘッダー */
+  .dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+  }
+  
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  
+  .user-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 28px;
+    font-weight: bold;
+  }
+  
+  .user-details h1 {
+    margin: 0 0 5px 0;
+    font-size: 24px;
+    color: #333;
+  }
+  
+  .user-email {
+    margin: 0 0 10px 0;
+    color: #666;
+    font-size: 14px;
+  }
+  
+  .user-type-badge {
+    background: #e3f2fd;
+    color: #1976d2;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  
+  /* ヘッダーアクション */
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .refresh-btn {
+    background: #4caf50;
+    color: white;
+    border: none;
+    padding: 10px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.2s;
+  }
+  
+  .refresh-btn:hover {
+    background: #388e3c;
+  }
+  
+  .logout-btn {
+    background: #f44336;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s;
+  }
+  
+  .logout-btn:hover {
+    background: #d32f2f;
+  }
+  
+  /* エラーバナー */
+  .error-banner {
+    background: #ffebee;
+    border: 1px solid #ffcdd2;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    padding: 0;
+    overflow: hidden;
+  }
+  
+  .error-content {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    gap: 12px;
+  }
+  
+  .error-icon {
+    font-size: 18px;
+    color: #f44336;
+  }
+  
+  .error-message {
+    flex: 1;
+    color: #c62828;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+  
+  .error-close {
+    background: none;
+    border: none;
+    color: #c62828;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+  }
+  
+  .error-close:hover {
+    background: rgba(244, 67, 54, 0.1);
+  }
+  
+  /* ローディング */
+  .loading {
+    text-align: center;
+    padding: 60px 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+  
+  .loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  .loading p {
+    margin: 0;
+    font-size: 16px;
+    color: #666;
+  }
+  
+  /* タブナビゲーション */
+  .dashboard-tabs {
+    display: flex;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+    overflow: hidden;
+  }
+  
+  .tab-btn {
+    flex: 1;
+    padding: 20px;
+    border: none;
+    background: white;
+    color: #666;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-bottom: 3px solid transparent;
+  }
+  
+  .tab-btn:hover {
+    background: #f5f5f5;
+    color: #333;
+  }
+  
+  .tab-btn.active {
+    color: #1976d2;
+    border-bottom-color: #1976d2;
+    background: #f8f9ff;
+  }
+  
+  /* ダッシュボードコンテンツ */
+  .dashboard-content {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+  }
+  
+  .section-header {
+    padding: 30px 30px 20px 30px;
+    border-bottom: 1px solid #eee;
+    position: relative;
+  }
+  
+  .section-header h2 {
+    margin: 0 0 5px 0;
+    font-size: 24px;
+    color: #333;
+  }
+  
+  .section-header p {
+    margin: 0;
+    color: #666;
+    font-size: 14px;
+  }
+  
+  /* データソース表示 */
+  .data-source {
+    position: absolute;
+    top: 30px;
+    right: 30px;
+    background: #e8f5e8;
+    color: #2e7d32;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  
+  /* 予約履歴セクション */
+  .bookings-section {
+    padding-bottom: 30px;
+  }
+  
+  .bookings-list {
+    padding: 0 30px 30px 30px;
+  }
+  
+  .booking-card {
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    transition: box-shadow 0.2s;
+  }
+  
+  .booking-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  .booking-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 15px;
+  }
+  
+  .booking-dates h3 {
+    margin: 0 0 5px 0;
+    font-size: 18px;
+    color: #333;
+  }
+  
+  .booking-dates p {
+    margin: 0;
+    color: #666;
+    font-size: 14px;
+  }
+  
+  .status-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  
+  .status-confirmed {
+    background: #e8f5e8;
+    color: #2e7d32;
+  }
+  
+  .status-pending {
+    background: #fff3e0;
+    color: #f57c00;
+  }
+  
+  .status-cancelled {
+    background: #ffebee;
+    color: #c62828;
+  }
+  
+  .status-completed {
+    background: #e3f2fd;
+    color: #1976d2;
+  }
+  
+  .booking-details {
+    margin-bottom: 20px;
+  }
+  
+  .booking-info {
+    margin-bottom: 15px;
+  }
+  
+  .booking-info p {
+    margin: 5px 0;
+    font-size: 14px;
+    color: #666;
+  }
+  
+  .room-details h4 {
+    margin: 0 0 10px 0;
+    font-size: 14px;
+    color: #333;
+    font-weight: 600;
+  }
+  
+  .room-item {
+    background: #f5f5f5;
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin-bottom: 5px;
+    font-size: 14px;
+  }
+  
+  .booking-actions {
+    display: flex;
+    gap: 10px;
+  }
+  
+  /* プロフィールセクション */
+  .profile-section {
+    padding-bottom: 30px;
+  }
+  
+  .profile-form {
+    padding: 0 30px 30px 30px;
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: #333;
+  }
+  
+  .form-control {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.2s;
+  }
+  
+  .form-control:focus {
+    outline: none;
+    border-color: #1976d2;
+  }
+  
+  .checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: normal;
+    cursor: pointer;
+  }
+  
+  .checkbox-label input[type="checkbox"] {
+    margin: 0;
+  }
+  
+  /* お気に入りセクション */
+  .favorites-section {
+    padding-bottom: 30px;
+  }
+  
+  /* 空の状態 */
+  .empty-state {
+    text-align: center;
+    padding: 60px 30px;
+  }
+  
+  .empty-icon {
+    font-size: 64px;
+    margin-bottom: 20px;
+    opacity: 0.5;
+  }
+  
+  .empty-state h3 {
+    margin: 0 0 10px 0;
+    font-size: 20px;
+    color: #333;
+  }
+  
+  .empty-state p {
+    margin: 0 0 30px 0;
+    color: #666;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  /* ボタンスタイル */
+  .primary-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+  
+  .primary-btn:hover {
+    transform: translateY(-1px);
+  }
+  
+  .secondary-btn {
+    background: #f5f5f5;
+    color: #333;
+    border: 1px solid #ddd;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .secondary-btn:hover {
+    background: #e0e0e0;
+  }
+  
+  .outline-btn {
+    background: white;
+    color: #1976d2;
+    border: 1px solid #1976d2;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .outline-btn:hover {
+    background: #1976d2;
+    color: white;
+  }
+  
+  /* レスポンシブ対応 */
+  @media (max-width: 768px) {
+    .user-dashboard {
+      padding: 15px;
+    }
+    
+    .dashboard-header {
+      flex-direction: column;
+      gap: 20px;
+      text-align: center;
+      padding: 20px;
+    }
+    
+    .user-info {
+      flex-direction: column;
+      text-align: center;
+    }
+    
+    .header-actions {
+      width: 100%;
+      justify-content: center;
+    }
+    
+    .dashboard-tabs {
+      flex-direction: column;
+    }
+    
+    .tab-btn {
+      border-bottom: 1px solid #eee;
+      border-right: none;
+    }
+    
+    .tab-btn.active {
+      border-bottom-color: #eee;
+      border-left: 3px solid #1976d2;
+    }
+    
+    .booking-header {
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .booking-actions {
+      flex-direction: column;
+    }
+    
+    .section-header,
+    .bookings-list,
+    .profile-form {
+      padding-left: 20px;
+      padding-right: 20px;
+    }
+    
+    .data-source {
+      position: static;
+      margin-top: 10px;
+      display: inline-block;
+    }
+    
+    .error-content {
+      padding: 12px 15px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .user-dashboard {
+      padding: 10px;
+    }
+    
+    .dashboard-header {
+      padding: 15px;
+    }
+    
+    .user-avatar {
+      width: 60px;
+      height: 60px;
+      font-size: 24px;
+    }
+    
+    .user-details h1 {
+      font-size: 20px;
+    }
+    
+    .section-header h2 {
+      font-size: 20px;
+    }
+    
+    .error-content {
+      padding: 10px 12px;
+      gap: 8px;
+    }
+    
+    .error-message {
+      font-size: 13px;
+    }
+  }
