@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
 import './UserDashboard.css';
 
@@ -9,143 +10,98 @@ const UserDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // 認証ユーザーのモックデータ（実際はAuthContextから取得）
-  const currentUser = {
-    uid: "temp_user_1748783111433", // Firestoreの実際のuser_idに変更
-    email: "oo00mixan00oo@icloud.com",
-    displayName: "テスト太郎"
-  };
-
-  const logout = () => {
-    // ログアウト処理（とりあえずホームに戻る）
-    window.location.href = '/';
-  };
+  // 🎯 新IDフォーマット対応認証情報取得
+  const { currentUser, logout, getUserId, getUserData } = useAuth();
 
   useEffect(() => {
-    fetchUserData();
-  }, []);
+    if (currentUser) {
+      fetchUserData();
+    }
+  }, [currentUser]);
 
   const fetchUserData = async () => {
     try {
       setLoading(true);
       setError(null);
       
-      console.log('ユーザーデータ取得開始:', currentUser.uid);
+      // 🎯 新IDフォーマットユーザーIDを取得
+      const userId = getUserId();
+      const userData = getUserData();
+      
+      console.log('🎯 ダッシュボード - ユーザー情報:', {
+        userId,
+        firebaseUid: currentUser?.uid,
+        email: userData?.email || currentUser?.email
+      });
       
       // プロフィール情報を設定
       setProfile({
-        id: currentUser.uid,
-        displayName: "テスト太郎",
-        email: currentUser.email,
-        userType: "guest",
-        language: "ja",
-        emailPreferences: {
+        id: userId,
+        displayName: userData?.displayName || currentUser?.displayName || 'ユーザー',
+        email: userData?.email || currentUser?.email || '',
+        userType: userData?.userType || 'guest',
+        language: userData?.language || 'ja',
+        emailPreferences: userData?.emailPreferences || {
           bookingConfirmation: true,
           marketing: false
         }
       });
       
-      // 実際のAPIから予約データを取得
-      try {
-        console.log('API呼び出し開始: /api/bookings/user/' + currentUser.uid);
-        
-        const response = await axios.get(`http://localhost:3000/api/bookings/user/${currentUser.uid}`, {
-          timeout: 10000, // 10秒タイムアウト
-          headers: {
-            'Content-Type': 'application/json',
-          }
-        });
-        
-        console.log('API応答受信:', response.data);
-        
-        // レスポンスデータの詳細ログ
-        if (response.data && Array.isArray(response.data)) {
-          console.log('予約データの詳細:', JSON.stringify(response.data, null, 2));
-          response.data.forEach((booking, index) => {
-            console.log(`予約${index + 1}:`, {
-              id: booking.id,
-              check_in_date: booking.check_in_date,
-              check_out_date: booking.check_out_date,
-              created_at: booking.created_at,
-              child_bookings: booking.child_bookings
-            });
+      // 🎯 新IDフォーマットで予約データを取得
+      if (userId) {
+        try {
+          console.log('📋 予約履歴取得開始:', userId);
+          
+          const response = await axios.get(`http://localhost:3000/api/bookings/user/${userId}`, {
+            timeout: 10000,
+            headers: {
+              'Content-Type': 'application/json',
+            }
           });
-        }
-        
-        if (response.data && Array.isArray(response.data)) {
-          setBookings(response.data);
-          console.log(`${response.data.length}件の予約を取得しました`);
-        } else {
-          console.log('予約データが空またはフォーマットが無効です');
-          setBookings([]);
-        }
-        
-      } catch (apiError) {
-        console.error('API呼び出しエラー:', apiError);
-        
-        // APIエラーの場合はモックデータでフォールバック
-        console.log('モックデータを使用します');
-        const mockBookings = [
-          {
-            id: "parent_rsva7f8d9e2",
-            check_in_date: "2025-06-10",
-            check_out_date: "2025-06-15",
-            status: "confirmed",
-            total_guests: 2,
-            total_amount: 3500,
-            child_bookings: [
-              {
-                room_id: "delhi-201",
-                number_of_guests: 2
-              }
-            ],
-            created_at: "2025-06-01T10:30:00.000Z"
-          },
-          {
-            id: "parent_booking_july",
-            check_in_date: "2025-07-01",
-            check_out_date: "2025-07-03", 
-            status: "pending",
-            total_guests: 3,
-            total_amount: 2100,
-            child_bookings: [
-              {
-                room_id: "delhi-302",
-                number_of_guests: 3
-              }
-            ],
-            created_at: "2025-06-20T15:45:00.000Z"
-          },
-          {
-            id: "parent_booking_august",
-            check_in_date: "2025-08-15",
-            check_out_date: "2025-08-18",
-            status: "completed",
-            total_guests: 1,
-            total_amount: 4200,
-            child_bookings: [
-              {
-                room_id: "varanasi-305",
-                number_of_guests: 1
-              }
-            ],
-            created_at: "2025-07-10T09:15:00.000Z"
+          
+          console.log('✅ 予約データ取得成功:', response.data);
+          
+          if (response.data && Array.isArray(response.data)) {
+            setBookings(response.data);
+            console.log(`📊 ${response.data.length}件の予約を取得`);
+          } else {
+            console.log('📝 予約データが空です');
+            setBookings([]);
           }
-        ];
-        setBookings(mockBookings);
-        
-        // APIエラーの詳細情報を表示
-        if (apiError.code === 'ECONNREFUSED') {
-          setError('バックエンドサーバーに接続できません。サーバーが起動しているか確認してください。');
-        } else if (apiError.response) {
-          setError(`API エラー: ${apiError.response.status} - ${apiError.response.data?.error || 'Unknown error'}`);
-        } else {
-          setError('ネットワークエラーが発生しました。モックデータを表示しています。');
+          
+        } catch (apiError) {
+          console.error('❌ 予約API呼び出しエラー:', apiError);
+          
+          // 🎯 現行データでフォールバック（開発中表示用）
+          console.log('🔧 開発中 - サンプルデータを表示');
+          const mockBookings = [
+            {
+              id: "B_5PMGVWYHSWPL",
+              check_in_date: "2025-07-06",
+              check_out_date: "2025-07-08", 
+              status: "confirmed",
+              number_of_guests: 2,
+              room_amount: 2300,
+              total_amount: 2300,
+              room_name: "デラックスルーム",
+              room_type: "deluxe",
+              primary_contact: {
+                name_kanji: "テスト 次郎",
+                email: "jiro@test.com"
+              },
+              created_at: "2025-06-04T22:35:50.000Z"
+            }
+          ];
+          setBookings(mockBookings);
+          setError('新IDシステム移行中です。モックデータを表示しています。');
         }
+      } else {
+        console.log('⚠️ ユーザーIDが取得できませんでした');
+        setError('ユーザーIDを取得できませんでした。再ログインしてください。');
       }
       
     } catch (err) {
-      console.error('データ取得エラー:', err);
+      console.error('❌ データ取得エラー:', err);
       setError('データの読み込みに失敗しました: ' + err.message);
     } finally {
       setLoading(false);
@@ -176,15 +132,6 @@ const UserDashboard = () => {
       });
     }
     
-    // 旧形式のFirestore Timestampオブジェクトの場合（seconds形式）
-    if (dateString && typeof dateString === 'object' && dateString.seconds) {
-      return new Date(dateString.seconds * 1000).toLocaleDateString('ja-JP', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      });
-    }
-    
     // 通常の日付文字列の場合
     const date = new Date(dateString);
     if (isNaN(date.getTime())) {
@@ -205,12 +152,12 @@ const UserDashboard = () => {
   };
 
   const handleRebook = (booking) => {
-    // 同じ条件で再予約画面に遷移
     const searchParams = new URLSearchParams({
       checkIn: booking.check_in_date,
       checkOut: booking.check_out_date,
-      totalGuests: booking.total_guests,
-      location: booking.child_bookings[0]?.room_id?.split('-')[0] || 'delhi'
+      totalGuests: booking.number_of_guests,
+      // 🎯 部屋IDから店舗を推測
+      location: booking.room_id?.split('-')[0] || 'delhi'
     });
     
     window.location.href = `/?${searchParams.toString()}`;
@@ -220,12 +167,21 @@ const UserDashboard = () => {
     fetchUserData();
   };
 
+  const handleLogout = async () => {
+    try {
+      await logout();
+      window.location.href = '/';
+    } catch (error) {
+      console.error('❌ ログアウトエラー:', error);
+    }
+  };
+
   if (loading) {
     return (
       <div className="user-dashboard">
         <div className="loading">
           <div className="loading-spinner"></div>
-          <p>予約データを読み込み中...</p>
+          <p>ユーザーデータを読み込み中...</p>
         </div>
       </div>
     );
@@ -237,19 +193,21 @@ const UserDashboard = () => {
       <div className="dashboard-header">
         <div className="user-info">
           <div className="user-avatar">
-            {profile?.displayName?.charAt(0) || 'T'}
+            {profile?.displayName?.charAt(0) || 'U'}
           </div>
           <div className="user-details">
             <h1>{profile?.displayName}</h1>
             <p className="user-email">{profile?.email}</p>
             <span className="user-type-badge">Guest</span>
+            {/* 🎯 新IDフォーマット表示 */}
+            <div className="user-id">ID: {profile?.id}</div>
           </div>
         </div>
         <div className="header-actions">
           <button className="refresh-btn" onClick={handleRefresh} title="データを更新">
             🔄
           </button>
-          <button className="logout-btn" onClick={logout}>
+          <button className="logout-btn" onClick={handleLogout}>
             ログアウト
           </button>
         </div>
@@ -295,10 +253,10 @@ const UserDashboard = () => {
           <div className="bookings-section">
             <div className="section-header">
               <h2>予約履歴</h2>
-              <p>過去と今後の予約を確認できます</p>
+              <p>新IDフォーマット対応 - 現行データを表示</p>
               {bookings.length > 0 && (
                 <div className="data-source">
-                  {error ? '📝 モックデータ表示中' : '🔥 Firestoreから取得'}
+                  {error ? '🔧 開発中データ' : '🔥 Firestoreから取得'}
                 </div>
               )}
             </div>
@@ -307,7 +265,7 @@ const UserDashboard = () => {
               <div className="empty-state">
                 <div className="empty-icon">📋</div>
                 <h3>予約履歴がありません</h3>
-                <p>初めてのご利用ですね！サンタナゲストハウスへようこそ。</p>
+                <p>新しい予約を作成してテストしてみましょう。</p>
                 <button 
                   className="primary-btn"
                   onClick={() => window.location.href = '/'}
@@ -331,45 +289,12 @@ const UserDashboard = () => {
                     
                     <div className="booking-details">
                       <div className="booking-info">
-                        <p><strong>ゲスト数:</strong> {booking.total_guests}名</p>
                         <p><strong>予約ID:</strong> {booking.id}</p>
-                        <p><strong>合計金額:</strong> ₹{booking.total_amount?.toLocaleString()}</p>
-                        {booking.created_at && (
-                          <p><strong>予約日時:</strong> {
-                            booking.created_at && typeof booking.created_at === 'object' && booking.created_at._seconds 
-                              ? new Date(booking.created_at._seconds * 1000).toLocaleDateString('ja-JP')
-                              : booking.created_at && typeof booking.created_at === 'object' && booking.created_at.seconds 
-                              ? new Date(booking.created_at.seconds * 1000).toLocaleDateString('ja-JP')
-                              : booking.created_at ? new Date(booking.created_at).toLocaleDateString('ja-JP') : 'Invalid Date'
-                          }</p>
-                        )}
+                        <p><strong>ゲスト数:</strong> {booking.number_of_guests}名</p>
+                        <p><strong>部屋:</strong> {booking.room_name || booking.room_type}</p>
+                        <p><strong>金額:</strong> ₹{booking.total_amount?.toLocaleString()}</p>
+                        <p><strong>予約日時:</strong> {formatDate(booking.created_at)}</p>
                       </div>
-                      
-                      {booking.child_bookings && booking.child_bookings.length > 0 && (
-                        <div className="room-details">
-                          <h4>宿泊部屋:</h4>
-                          {Array.isArray(booking.child_bookings) && typeof booking.child_bookings[0] === 'string' ? (
-                            // child_bookingsがID配列の場合
-                            booking.child_bookings.map((childBookingId, index) => (
-                              <div key={index} className="room-item">
-                                <span className="room-name">
-                                  予約ID: {childBookingId}
-                                </span>
-                              </div>
-                            ))
-                          ) : (
-                            // child_bookingsがオブジェクト配列の場合
-                            booking.child_bookings.map((childBooking, index) => (
-                              <div key={index} className="room-item">
-                                <span className="room-name">
-                                  {childBooking.room_id || '部屋情報なし'} 
-                                  ({childBooking.number_of_guests || '人数不明'}名)
-                                </span>
-                              </div>
-                            ))
-                          )}
-                        </div>
-                      )}
                     </div>
                     
                     <div className="booking-actions">
@@ -379,11 +304,9 @@ const UserDashboard = () => {
                       >
                         同条件で再予約
                       </button>
-                      {booking.status === 'confirmed' && (
-                        <button className="outline-btn">
-                          詳細を見る
-                        </button>
-                      )}
+                      <button className="outline-btn">
+                        詳細を見る
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -397,10 +320,22 @@ const UserDashboard = () => {
           <div className="profile-section">
             <div className="section-header">
               <h2>プロフィール設定</h2>
-              <p>アカウント情報と設定を管理できます</p>
+              <p>新IDフォーマット対応プロフィール</p>
             </div>
             
             <div className="profile-form">
+              <div className="form-group">
+                <label>ユーザーID</label>
+                <input 
+                  type="text" 
+                  value={profile?.id || ''} 
+                  className="form-control"
+                  readOnly
+                  style={{ fontFamily: 'monospace', background: '#f8f9fa' }}
+                />
+                <small>新IDフォーマット（実用性重視）</small>
+              </div>
+              
               <div className="form-group">
                 <label>表示名</label>
                 <input 
@@ -423,7 +358,7 @@ const UserDashboard = () => {
               
               <div className="form-group">
                 <label>言語設定</label>
-                <select className="form-control" defaultValue="ja">
+                <select className="form-control" value={profile?.language || 'ja'} disabled>
                   <option value="ja">日本語</option>
                   <option value="en">English</option>
                 </select>
@@ -451,7 +386,9 @@ const UserDashboard = () => {
                 </div>
               </div>
               
-              <button className="primary-btn">設定を保存</button>
+              <button className="primary-btn" disabled>
+                設定を保存（開発中）
+              </button>
             </div>
           </div>
         )}

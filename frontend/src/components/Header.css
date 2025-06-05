@@ -1,9 +1,9 @@
-/* Header.css - ドロップダウンメニュー対応版 */
+/* Header.css - モーダル対応版 */
 
 .header {
-    background: #2c3e50;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-    padding: 0;
+    padding: 1rem 0;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     position: sticky;
     top: 0;
@@ -16,60 +16,82 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 20px;
-    height: 70px;
+    padding: 0 2rem;
   }
   
-  /* ロゴ */
   .logo {
     cursor: pointer;
-    transition: opacity 0.2s;
+    transition: transform 0.2s ease;
   }
   
   .logo:hover {
-    opacity: 0.8;
+    transform: scale(1.05);
   }
   
   .logo h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
     margin: 0;
-    font-size: 24px;
-    font-weight: 600;
+    color: white;
   }
   
-  /* ナビゲーション */
-  .nav-menu {
-    flex: 1;
-    margin: 0 40px;
-  }
-  
-  .nav-links {
+  .nav-menu ul {
     display: flex;
     list-style: none;
     margin: 0;
     padding: 0;
-    gap: 30px;
-    justify-content: center;
+    gap: 2rem;
   }
   
-  .nav-links a {
+  .nav-menu a {
     color: white;
     text-decoration: none;
     font-weight: 500;
-    font-size: 16px;
-    transition: color 0.2s;
+    transition: color 0.2s ease;
   }
   
-  .nav-links a:hover {
-    color: #3498db;
+  .nav-menu a:hover {
+    color: #f0f0f0;
   }
   
-  /* 認証セクション */
   .auth-section {
-    display: flex;
-    align-items: center;
+    position: relative;
   }
   
-  /* ユーザーメニュー */
+  .auth-buttons {
+    display: flex;
+    gap: 1rem;
+  }
+  
+  .login-btn,
+  .signup-btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .login-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+  
+  .login-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+  
+  .signup-btn {
+    background: white;
+    color: #667eea;
+  }
+  
+  .signup-btn:hover {
+    background: #f0f0f0;
+  }
+  
   .user-menu-container {
     position: relative;
   }
@@ -77,48 +99,38 @@
   .user-menu-trigger {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 6px 10px;
-    border-radius: 20px;
+    gap: 0.5rem;
     cursor: pointer;
-    transition: background-color 0.2s;
-    background: rgba(255, 255, 255, 0.1);
+    padding: 0.5rem;
+    border-radius: 8px;
+    transition: background 0.2s ease;
   }
   
   .user-menu-trigger:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.1);
   }
   
   .user-avatar {
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: rgba(255, 255, 255, 0.3);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
-    font-weight: bold;
-    font-size: 12px;
+    font-weight: 600;
+    font-size: 0.9rem;
   }
   
   .user-name {
     font-weight: 500;
-    font-size: 13px;
-    color: white;
   }
   
   .dropdown-arrow {
-    font-size: 8px;
-    color: #bdc3c7;
-    transition: transform 0.2s;
+    font-size: 0.8rem;
+    transition: transform 0.2s ease;
   }
   
-  .user-menu-trigger:hover .dropdown-arrow {
-    transform: rotate(180deg);
-  }
-  
-  /* ドロップダウンメニュー */
   .dropdown-menu {
     position: absolute;
     top: 100%;
@@ -126,47 +138,34 @@
     background: white;
     border-radius: 8px;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-    min-width: 220px;
+    min-width: 250px;
     overflow: hidden;
-    margin-top: 8px;
-    animation: dropdownSlide 0.2s ease-out;
+    z-index: 1001;
+    margin-top: 0.5rem;
   }
   
-  @keyframes dropdownSlide {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  
-  /* ドロップダウンヘッダー */
   .dropdown-header {
-    padding: 14px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
   }
   
   .dropdown-user-info {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 0.75rem;
   }
   
   .dropdown-avatar {
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
+    background: #667eea;
+    color: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
-    font-weight: bold;
-    font-size: 14px;
+    font-weight: 600;
   }
   
   .dropdown-details {
@@ -174,55 +173,54 @@
   }
   
   .dropdown-name {
-    font-size: 14px;
     font-weight: 600;
-    margin-bottom: 2px;
+    color: #333;
+    margin-bottom: 0.25rem;
   }
   
   .dropdown-email {
-    font-size: 12px;
-    opacity: 0.9;
-    margin-bottom: 4px;
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 0.25rem;
   }
   
   .dropdown-type {
-    font-size: 11px;
-    background: rgba(255, 255, 255, 0.2);
-    padding: 2px 8px;
-    border-radius: 10px;
+    font-size: 0.8rem;
+    color: #888;
+    background: #e9ecef;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
     display: inline-block;
   }
   
-  /* ドロップダウン区切り線 */
+  .dropdown-id {
+    font-size: 0.75rem;
+    color: #888;
+    font-family: monospace;
+    margin-top: 0.25rem;
+  }
+  
   .dropdown-divider {
     height: 1px;
-    background: #ecf0f1;
-    margin: 0;
+    background: #e9ecef;
   }
   
-  /* ドロップダウンアイテム */
   .dropdown-items {
-    padding: 10px 0;
-  }
-  
-  .dropdown-footer {
-    padding: 10px 0;
-    background: #f8f9fa;
+    padding: 0.5rem 0;
   }
   
   .dropdown-item {
     width: 100%;
-    padding: 10px 16px;
+    padding: 0.75rem 1rem;
     border: none;
     background: none;
+    text-align: left;
+    cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 10px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    font-size: 13px;
-    color: #2c3e50;
-    text-align: left;
+    gap: 0.75rem;
+    color: #333;
+    transition: background 0.2s ease;
   }
   
   .dropdown-item:hover {
@@ -230,93 +228,134 @@
   }
   
   .dropdown-icon {
-    font-size: 14px;
-    width: 18px;
-    text-align: center;
+    font-size: 1rem;
+  }
+  
+  .dropdown-footer {
+    border-top: 1px solid #e9ecef;
+    padding: 0.5rem 0;
   }
   
   .logout-item {
-    color: #e74c3c;
-    font-weight: 500;
+    color: #dc3545;
   }
   
   .logout-item:hover {
-    background: #ffebee;
+    background: #fff5f5;
   }
   
-  /* 認証ボタン（ログアウト時） */
-  .auth-buttons {
+  /* 🎯 認証モーダルスタイル */
+  .auth-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
     display: flex;
-    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.2s ease-out;
   }
   
-  .login-btn, .signup-btn {
-    padding: 8px 16px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    background: transparent;
-    color: white;
-    border-radius: 5px;
+  .auth-modal {
+    position: relative;
+    background: white;
+    border-radius: 12px;
+    max-width: 400px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slideIn 0.3s ease-out;
+  }
+  
+  .auth-modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
     cursor: pointer;
-    font-weight: 500;
-    transition: all 0.2s;
+    color: #666;
+    z-index: 1;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
   }
   
-  .login-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
+  .auth-modal-close:hover {
+    background: #f0f0f0;
+    color: #333;
   }
   
-  .signup-btn {
-    background: #3498db;
-    border-color: #3498db;
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
   
-  .signup-btn:hover {
-    background: #2980b9;
-    border-color: #2980b9;
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(-20px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
   }
   
   /* レスポンシブ対応 */
   @media (max-width: 768px) {
     .header-content {
-      padding: 0 15px;
-      height: 60px;
+      padding: 0 1rem;
+    }
+    
+    .nav-menu ul {
+      gap: 1rem;
+    }
+    
+    .nav-menu a {
+      font-size: 0.9rem;
     }
     
     .logo h1 {
-      font-size: 20px;
-    }
-    
-    .nav-menu {
-      display: none;
-    }
-    
-    .user-name {
-      display: none;
+      font-size: 1.3rem;
     }
     
     .dropdown-menu {
-      min-width: 250px;
-      right: -10px;
+      min-width: 200px;
+      right: -1rem;
     }
     
-    .dropdown-header {
-      padding: 15px;
-    }
-    
-    .dropdown-avatar {
-      width: 40px;
-      height: 40px;
-      font-size: 16px;
+    .auth-modal {
+      margin: 1rem;
+      width: calc(100% - 2rem);
     }
   }
   
   @media (max-width: 480px) {
-    .header-content {
-      padding: 0 10px;
+    .nav-menu {
+      display: none;
     }
     
-    .dropdown-menu {
-      min-width: 220px;
-      right: -20px;
+    .auth-buttons {
+      gap: 0.5rem;
+    }
+    
+    .login-btn,
+    .signup-btn {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.9rem;
     }
   }

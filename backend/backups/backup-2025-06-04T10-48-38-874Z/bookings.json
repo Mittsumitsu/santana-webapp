@@ -1,0 +1,117 @@
+[
+  {
+    "id": "6cW1AB5Q5ljkKkYN9WRZ",
+    "parent_booking_id": "4WXXScxzwTCvX03UBbqL",
+    "user_id": "temp_user_1748783756324",
+    "room_id": "delhi-401",
+    "check_in_date": "2025-07-06",
+    "check_in_time": "14:00",
+    "check_out_date": "2025-07-08",
+    "status": "confirmed",
+    "number_of_guests": 2,
+    "primary_guest": {
+      "name_romaji": "TEST TARO",
+      "gender": "male"
+    },
+    "additional_guests": [
+      {
+        "name_romaji": "TEST HANAKO",
+        "gender": "female"
+      }
+    ],
+    "total_amount": 2300,
+    "updated_at": {
+      "_seconds": 1748783758,
+      "_nanoseconds": 468000000
+    },
+    "created_at": {
+      "_seconds": 1748783758,
+      "_nanoseconds": 468000000
+    }
+  },
+  {
+    "id": "KygJ7twManzwAuElO9Xq",
+    "parent_booking_id": "NvXVLIcYvqNQggJP1nmp",
+    "user_id": "temp_user_1748934137944",
+    "room_id": "varanasi-201",
+    "check_in_date": "2025-06-09",
+    "check_in_time": "14:00",
+    "check_out_date": "2025-06-11",
+    "status": "confirmed",
+    "number_of_guests": 1,
+    "primary_guest": {
+      "name_romaji": "TEST TARO",
+      "gender": "male"
+    },
+    "additional_guests": [],
+    "total_amount": 1400,
+    "updated_at": {
+      "_seconds": 1748934140,
+      "_nanoseconds": 514000000
+    },
+    "created_at": {
+      "_seconds": 1748934140,
+      "_nanoseconds": 514000000
+    }
+  },
+  {
+    "id": "QHgsKXd3lYDIIJTYU06i",
+    "parent_booking_id": "VPvvZQ75mEiCVBLTGxLk",
+    "user_id": "temp_user_1748783111433",
+    "room_id": "delhi-302",
+    "check_in_date": "2025-07-01",
+    "check_in_time": "17:00",
+    "check_out_date": "2025-07-03",
+    "status": "confirmed",
+    "number_of_guests": 3,
+    "primary_guest": {
+      "name_romaji": "TEST TARO",
+      "gender": "male"
+    },
+    "additional_guests": [
+      {
+        "name_romaji": "TEST JIRO",
+        "gender": "male"
+      },
+      {
+        "name_romaji": "TEST SABURO",
+        "gender": "male"
+      }
+    ],
+    "total_amount": 2100,
+    "updated_at": {
+      "_seconds": 1748783113,
+      "_nanoseconds": 906000000
+    },
+    "created_at": {
+      "_seconds": 1748783113,
+      "_nanoseconds": 906000000
+    }
+  },
+  {
+    "id": "rsv_child1",
+    "parent_booking_id": "parent_rsva7f8d9e2",
+    "user_id": "cust5e6f7a8b",
+    "room_id": "delhi-201",
+    "check_in_date": "2025-05-10",
+    "check_in_time": "14:00",
+    "check_out_date": "2025-05-15",
+    "status": "confirmed",
+    "number_of_guests": 2,
+    "primary_guest": {
+      "name_kanji": "田中 花子",
+      "name_romaji": "Tanaka Hanako",
+      "gender": "female"
+    },
+    "additional_guests": [
+      {
+        "name_kanji": "佐藤 美子",
+        "name_romaji": "Sato Yoshiko",
+        "gender": "female"
+      }
+    ],
+    "total_amount": 3500,
+    "created_at": "2025-05-07T10:30:00.000Z",
+    "updated_at": "2025-05-07T10:30:00.000Z"
+  }
+]

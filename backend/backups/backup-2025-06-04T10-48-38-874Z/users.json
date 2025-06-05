@@ -1,0 +1,43 @@
+[
+  {
+    "id": "6iBJ1KrAZdU9E88S0Z2BQVDKTji1",
+    "displayName": "テスト太郎",
+    "email": "oo00mixan00oo@icloud.com",
+    "createdAt": {
+      "_seconds": 1748771860,
+      "_nanoseconds": 93000000
+    },
+    "userType": "guest",
+    "language": "ja",
+    "emailPreferences": {
+      "marketing": false,
+      "bookingConfirmation": true
+    },
+    "lastLogin": {
+      "_seconds": 1749030872,
+      "_nanoseconds": 326000000
+    }
+  },
+  {
+    "id": "cust5e6f7a8b",
+    "name": {
+      "kanji": "田中 太郎",
+      "romaji": "Tanaka Taro"
+    },
+    "email": "tanaka@example.com",
+    "password_hash": "$2a$12$K8HFh3kF.e.h.y.j5p5s.O2RmvXhRFVJJZQK4A.D3wHXIpqbG1fSG",
+    "user_type": "guest",
+    "language": "ja",
+    "gender": "male",
+    "created_at": "2025-05-01T10:00:00.000Z",
+    "updated_at": "2025-05-01T10:00:00.000Z",
+    "last_login": "2025-05-07T09:30:00.000Z",
+    "stay_history": [
+      "parent_rsva7f8d9e2"
+    ],
+    "email_preferences": {
+      "marketing": false,
+      "booking_confirmation": true
+    }
+  }
+]

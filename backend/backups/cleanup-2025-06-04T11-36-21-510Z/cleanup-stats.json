@@ -1,0 +1,12 @@
+{
+  "deleted": {
+    "parent_bookings": 0,
+    "old_bookings": 0,
+    "old_users": 0
+  },
+  "verified": {
+    "new_users": 0,
+    "new_bookings": 0,
+    "new_rooms": 0
+  }
+}

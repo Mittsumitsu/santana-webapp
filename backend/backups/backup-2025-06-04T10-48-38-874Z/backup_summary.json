@@ -1,0 +1,17 @@
+{
+  "backup_timestamp": "2025-06-04T10:48:42.720Z",
+  "backup_directory": "/Users/mixter/santana-webapp/backend/backups/backup-2025-06-04T10-48-38-874Z",
+  "data_counts": {
+    "parent_bookings": 4,
+    "child_bookings": 4,
+    "users": 2,
+    "availability": 11,
+    "rooms": 29
+  },
+  "migration_ready": true,
+  "notes": [
+    "移行前の完全バックアップ",
+    "問題発生時はこのデータで復旧可能",
+    "parent_bookings + bookings → unified_bookings への変換対象"
+  ]
+}

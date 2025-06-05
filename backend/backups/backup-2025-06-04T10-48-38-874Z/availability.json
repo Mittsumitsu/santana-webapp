@@ -1,0 +1,130 @@
+[
+  {
+    "id": "G3fhAXmuQUxoLeYdPMVL",
+    "room_id": "varanasi-201",
+    "date": "2025-06-10",
+    "status": "booked",
+    "booking_id": "KygJ7twManzwAuElO9Xq",
+    "price_override": null,
+    "reason": null,
+    "updated_at": {
+      "_seconds": 1748934140,
+      "_nanoseconds": 514000000
+    }
+  },
+  {
+    "id": "LwocwJrEfWweVO6qPizi",
+    "room_id": "delhi-302",
+    "date": "2025-07-01",
+    "status": "booked",
+    "booking_id": "QHgsKXd3lYDIIJTYU06i",
+    "price_override": null,
+    "reason": null,
+    "updated_at": {
+      "_seconds": 1748783113,
+      "_nanoseconds": 906000000
+    }
+  },
+  {
+    "id": "OoDhbko41OBPnh9Og0br",
+    "room_id": "varanasi-201",
+    "date": "2025-06-09",
+    "status": "booked",
+    "booking_id": "KygJ7twManzwAuElO9Xq",
+    "price_override": null,
+    "reason": null,
+    "updated_at": {
+      "_seconds": 1748934140,
+      "_nanoseconds": 514000000
+    }
+  },
+  {
+    "id": "avl3e4f5a6b",
+    "room_id": "delhi-201",
+    "date": "2025-05-10",
+    "status": "booked",
+    "booking_id": "rsv_child1",
+    "price_override": null,
+    "reason": null,
+    "updated_at": "2025-05-07T10:30:00.000Z"
+  },
+  {
+    "id": "avl4f5g6h7i",
+    "room_id": "delhi-201",
+    "date": "2025-05-11",
+    "status": "booked",
+    "booking_id": "rsv_child1",
+    "price_override": null,
+    "reason": null,
+    "updated_at": "2025-05-07T10:30:00.000Z"
+  },
+  {
+    "id": "avl5g6h7i8j",
+    "room_id": "delhi-201",
+    "date": "2025-05-12",
+    "status": "booked",
+    "booking_id": "rsv_child1",
+    "price_override": null,
+    "reason": null,
+    "updated_at": "2025-05-07T10:30:00.000Z"
+  },
+  {
+    "id": "avl6h7i8j9k",
+    "room_id": "delhi-201",
+    "date": "2025-05-13",
+    "status": "booked",
+    "booking_id": "rsv_child1",
+    "price_override": null,
+    "reason": null,
+    "updated_at": "2025-05-07T10:30:00.000Z"
+  },
+  {
+    "id": "avl7i8j9k0l",
+    "room_id": "delhi-201",
+    "date": "2025-05-14",
+    "status": "booked",
+    "booking_id": "rsv_child1",
+    "price_override": null,
+    "reason": null,
+    "updated_at": "2025-05-07T10:30:00.000Z"
+  },
+  {
+    "id": "jQXE4YaBqV8LD3F5lubv",
+    "room_id": "delhi-401",
+    "date": "2025-07-06",
+    "status": "booked",
+    "booking_id": "6cW1AB5Q5ljkKkYN9WRZ",
+    "price_override": null,
+    "reason": null,
+    "updated_at": {
+      "_seconds": 1748783758,
+      "_nanoseconds": 468000000
+    }
+  },
+  {
+    "id": "jTDNpJhzcmFky5dyNgy7",
+    "room_id": "delhi-401",
+    "date": "2025-07-07",
+    "status": "booked",
+    "booking_id": "6cW1AB5Q5ljkKkYN9WRZ",
+    "price_override": null,
+    "reason": null,
+    "updated_at": {
+      "_seconds": 1748783758,
+      "_nanoseconds": 468000000
+    }
+  },
+  {
+    "id": "kjFTMUPJIOokbFUCuf8Y",
+    "room_id": "delhi-302",
+    "date": "2025-07-02",
+    "status": "booked",
+    "booking_id": "QHgsKXd3lYDIIJTYU06i",
+    "price_override": null,
+    "reason": null,
+    "updated_at": {
+      "_seconds": 1748783113,
+      "_nanoseconds": 906000000
+    }
+  }
+]

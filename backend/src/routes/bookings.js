@@ -1,4 +1,4 @@
-// src/routes/bookings.js
+// src/routes/bookings.js - 本番同等（クリーン版）
 const express = require('express');
 const router = express.Router();
 const bookingController = require('../controllers/bookingController');

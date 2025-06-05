@@ -1,0 +1,38 @@
+[
+  {
+    "type": "unify_user_bookings",
+    "oldUserId": "temp_user_1748783756324",
+    "newUserId": "U_RCBCBK7V",
+    "bookings": [
+      "4WXXScxzwTCvX03UBbqL",
+      "6cW1AB5Q5ljkKkYN9WRZ"
+    ]
+  },
+  {
+    "type": "unify_user_bookings",
+    "oldUserId": "temp_user_1748934137944",
+    "newUserId": "U_RCBCBK7V",
+    "bookings": [
+      "NvXVLIcYvqNQggJP1nmp",
+      "KygJ7twManzwAuElO9Xq"
+    ]
+  },
+  {
+    "type": "unify_user_bookings",
+    "oldUserId": "temp_user_1748783111433",
+    "newUserId": "U_RCBCBK7V",
+    "bookings": [
+      "VPvvZQ75mEiCVBLTGxLk",
+      "QHgsKXd3lYDIIJTYU06i"
+    ]
+  },
+  {
+    "type": "unify_user_bookings",
+    "oldUserId": "cust5e6f7a8b",
+    "newUserId": "U_RCBCBK7V",
+    "bookings": [
+      "parent_rsva7f8d9e2",
+      "rsv_child1"
+    ]
+  }
+]

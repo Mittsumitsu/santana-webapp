@@ -1,0 +1,108 @@
+[
+  {
+    "id": "4WXXScxzwTCvX03UBbqL",
+    "user_id": "temp_user_1748783756324",
+    "check_in_date": "2025-07-06",
+    "check_out_date": "2025-07-08",
+    "status": "confirmed",
+    "is_early_arrival": false,
+    "total_guests": 2,
+    "primary_contact": {
+      "name_kanji": "テスト 太郎",
+      "name_romaji": "TEST TARO",
+      "email": "oo00mixan00oo@icloud.com",
+      "gender": "male"
+    },
+    "total_amount": 2300,
+    "created_by": "temp_user_1748783756324",
+    "updated_at": {
+      "_seconds": 1748783758,
+      "_nanoseconds": 468000000
+    },
+    "created_at": {
+      "_seconds": 1748783758,
+      "_nanoseconds": 468000000
+    },
+    "child_bookings": [
+      "6cW1AB5Q5ljkKkYN9WRZ"
+    ]
+  },
+  {
+    "id": "NvXVLIcYvqNQggJP1nmp",
+    "user_id": "temp_user_1748934137944",
+    "check_in_date": "2025-06-09",
+    "check_out_date": "2025-06-11",
+    "status": "confirmed",
+    "is_early_arrival": false,
+    "total_guests": 1,
+    "primary_contact": {
+      "name_kanji": "テスト 太郎",
+      "name_romaji": "TEST TARO",
+      "email": "oo00mixan00oo@icloud.com",
+      "gender": "male"
+    },
+    "total_amount": 1400,
+    "created_by": "temp_user_1748934137944",
+    "updated_at": {
+      "_seconds": 1748934140,
+      "_nanoseconds": 514000000
+    },
+    "created_at": {
+      "_seconds": 1748934140,
+      "_nanoseconds": 514000000
+    },
+    "child_bookings": [
+      "KygJ7twManzwAuElO9Xq"
+    ]
+  },
+  {
+    "id": "VPvvZQ75mEiCVBLTGxLk",
+    "user_id": "temp_user_1748783111433",
+    "check_in_date": "2025-07-01",
+    "check_out_date": "2025-07-03",
+    "status": "confirmed",
+    "is_early_arrival": false,
+    "total_guests": 3,
+    "primary_contact": {
+      "name_kanji": "テスト 太郎",
+      "name_romaji": "TEST TARO",
+      "email": "oo00mixan00oo@icloud.com",
+      "gender": "male"
+    },
+    "total_amount": 2100,
+    "created_by": "temp_user_1748783111433",
+    "updated_at": {
+      "_seconds": 1748783113,
+      "_nanoseconds": 906000000
+    },
+    "created_at": {
+      "_seconds": 1748783113,
+      "_nanoseconds": 906000000
+    },
+    "child_bookings": [
+      "QHgsKXd3lYDIIJTYU06i"
+    ]
+  },
+  {
+    "id": "parent_rsva7f8d9e2",
+    "user_id": "cust5e6f7a8b",
+    "check_in_date": "2025-05-10",
+    "check_out_date": "2025-05-15",
+    "status": "confirmed",
+    "is_early_arrival": false,
+    "total_guests": 2,
+    "primary_contact": {
+      "name_kanji": "田中 太郎",
+      "name_romaji": "Tanaka Taro",
+      "email": "tanaka@example.com"
+    },
+    "total_amount": 3500,
+    "payment_id": "pmt1d2e3f4a",
+    "child_bookings": [
+      "rsv_child1"
+    ],
+    "created_at": "2025-05-07T10:30:00.000Z",
+    "updated_at": "2025-05-07T10:30:00.000Z",
+    "created_by": "cust5e6f7a8b"
+  }
+]

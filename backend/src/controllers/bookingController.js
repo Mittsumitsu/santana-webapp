@@ -1,267 +1,236 @@
 const admin = require('firebase-admin');
 const db = admin.firestore();
 
+// 🔥 新IDシステム対応版 BookingController
+
 // 全ての予約を取得 (管理者用)
 exports.getAllBookings = async (req, res) => {
   try {
-    console.log('getAllBookings が呼び出されました');
-    const bookingsSnapshot = await db.collection('parent_bookings').get();
+    console.log('🔥 新IDシステム - getAllBookings が呼び出されました');
+    
+    // 🎯 新IDシステムでは統合予約のみ取得
+    const bookingsSnapshot = await db.collection('bookings').get();
     const bookings = [];
 
     bookingsSnapshot.forEach(doc => {
-      bookings.push({
-        id: doc.id,
-        ...doc.data(),
-      });
+      const bookingData = doc.data();
+      
+      // 新IDシステムのデータのみを対象にする
+      if (bookingData.id && bookingData.id.startsWith('B_')) {
+        bookings.push({
+          id: doc.id,
+          ...bookingData,
+        });
+      }
     });
 
-    console.log(`${bookings.length} 件の予約が見つかりました`);
+    console.log(`✅ 新IDシステム予約: ${bookings.length} 件が見つかりました`);
     res.status(200).json(bookings);
   } catch (error) {
-    console.error('予約の取得中にエラーが発生しました:', error);
+    console.error('❌ 予約の取得中にエラーが発生しました:', error);
     res.status(500).json({ error: 'サーバーエラーが発生しました' });
   }
 };
 
-// ユーザーIDで予約を取得
+// 🎯 新IDシステム対応: ユーザーIDで予約を取得
 exports.getUserBookings = async (req, res) => {
   try {
     const userId = req.params.userId;
-    console.log('ユーザーID:', userId); // デバッグログ
+    console.log('🔥 新IDシステム - ユーザー予約取得:', userId);
 
+    // 新IDシステムのユーザーIDかチェック
+    if (!userId.startsWith('U_')) {
+      console.log('⚠️ 古いIDフォーマット検出:', userId);
+      return res.status(400).json({ 
+        error: '新IDシステムのユーザーIDが必要です',
+        expected_format: 'U_XXXXXXXX',
+        received: userId
+      });
+    }
+
+    // 🎯 統合予約コレクションから検索
     const bookingsSnapshot = await db
-      .collection('parent_bookings')
+      .collection('bookings')
       .where('user_id', '==', userId)
       .orderBy('created_at', 'desc')
       .get();
 
-    console.log('取得した予約数:', bookingsSnapshot.size); // デバッグログ
+    console.log('🔍 取得した予約数:', bookingsSnapshot.size);
 
     const bookings = [];
     bookingsSnapshot.forEach(doc => {
-      bookings.push({
-        id: doc.id,
-        ...doc.data(),
-      });
+      const bookingData = doc.data();
+      
+      // 新IDシステムの予約のみを対象
+      if (bookingData.id && bookingData.id.startsWith('B_')) {
+        console.log(`📅 予約発見: ${bookingData.id} - ${bookingData.check_in_date} to ${bookingData.check_out_date}`);
+        
+        bookings.push({
+          id: doc.id,
+          ...bookingData,
+          // フロントエンド表示用の追加情報
+          is_new_system: true,
+          display_format: 'unified_booking'
+        });
+      }
+    });
+
+    console.log(`✅ 新IDシステム予約返却: ${bookings.length} 件`);
+    
+    // 詳細ログ
+    bookings.forEach((booking, index) => {
+      console.log(`  ${index + 1}. ${booking.id} - ₹${booking.total_amount} - ${booking.status}`);
     });
 
     res.status(200).json(bookings);
   } catch (error) {
-    console.error('ユーザー予約の取得中にエラーが発生しました:', error);
-    res.status(500).json({ error: 'サーバーエラーが発生しました', message: error.message });
+    console.error('❌ ユーザー予約の取得中にエラーが発生しました:', error);
+    res.status(500).json({ 
+      error: 'サーバーエラーが発生しました', 
+      message: error.message,
+      userId: req.params.userId
+    });
   }
 };
 
-// 特定の予約IDで予約を取得
+// 特定の予約IDで予約を取得 (新IDシステム対応)
 exports.getBookingById = async (req, res) => {
   try {
     const bookingId = req.params.id;
-    console.log('予約ID:', bookingId); // デバッグログ
+    console.log('🔥 新IDシステム - 予約詳細取得:', bookingId);
 
-    const bookingDoc = await db.collection('parent_bookings').doc(bookingId).get();
+    // 新IDシステムの予約IDかチェック
+    if (!bookingId.startsWith('B_')) {
+      console.log('⚠️ 古い予約ID検出:', bookingId);
+      return res.status(400).json({ 
+        error: '新IDシステムの予約IDが必要です',
+        expected_format: 'B_XXXXXXXXXXXX',
+        received: bookingId
+      });
+    }
+
+    // 🎯 統合予約から取得
+    const bookingDoc = await db.collection('bookings').doc(bookingId).get();
 
     if (!bookingDoc.exists) {
-      console.log('予約が見つかりません:', bookingId);
+      console.log('❌ 予約が見つかりません:', bookingId);
       return res.status(404).json({ error: '予約が見つかりません' });
     }
 
     const bookingData = bookingDoc.data();
-
-    // 子予約を取得
-    const childBookingsSnapshot = await db
-      .collection('bookings')
-      .where('parent_booking_id', '==', bookingId)
-      .get();
-
-    console.log('取得した子予約数:', childBookingsSnapshot.size); // デバッグログ
-
-    const childBookings = [];
-    childBookingsSnapshot.forEach(doc => {
-      childBookings.push({
-        id: doc.id,
-        ...doc.data(),
-      });
-    });
-
+    
+    // 統合予約なので子予約の概念はないが、roomsフィールドに部屋情報がある
+    console.log(`✅ 統合予約取得成功: ${bookingId}`);
+    console.log(`   ユーザー: ${bookingData.user_id}`);
+    console.log(`   部屋数: ${bookingData.rooms?.length || 0}`);
+    
     res.status(200).json({
       id: bookingDoc.id,
       ...bookingData,
-      child_bookings: childBookings,
+      is_unified_booking: true,
+      room_count: bookingData.rooms?.length || 0
     });
   } catch (error) {
-    console.error('予約の取得中にエラーが発生しました:', error);
-    res.status(500).json({ error: 'サーバーエラーが発生しました', message: error.message });
+    console.error('❌ 予約の取得中にエラーが発生しました:', error);
+    res.status(500).json({ 
+      error: 'サーバーエラーが発生しました', 
+      message: error.message 
+    });
   }
 };
 
-// 新しい予約を作成 (親予約・子予約) - トランザクション修正版
+// 🎯 新IDシステム対応: 新しい予約を作成
 exports.createBooking = async (req, res) => {
   try {
     const { user_id, check_in_date, check_out_date, primary_contact, rooms } = req.body;
 
-    console.log('予約作成リクエスト:', { user_id, check_in_date, check_out_date });
+    console.log('🔥 新IDシステム - 予約作成リクエスト:', { 
+      user_id, 
+      check_in_date, 
+      check_out_date,
+      rooms_count: rooms?.length 
+    });
 
-    if (
-      !user_id ||
-      !check_in_date ||
-      !check_out_date ||
-      !primary_contact ||
-      !rooms ||
-      !Array.isArray(rooms)
-    ) {
+    // 新IDシステムのユーザーIDかチェック
+    if (!user_id.startsWith('U_')) {
+      return res.status(400).json({ 
+        error: '新IDシステムのユーザーIDが必要です',
+        expected_format: 'U_XXXXXXXX',
+        received: user_id
+      });
+    }
+
+    if (!user_id || !check_in_date || !check_out_date || !primary_contact || !rooms || !Array.isArray(rooms)) {
       return res.status(400).json({ error: '必要な情報が不足しています' });
     }
 
-    // トランザクション開始
-    const result = await db.runTransaction(async transaction => {
-      // 🔥 【修正1】すべての読み取り操作を先に実行
-      const roomDocs = [];
-      for (const room of rooms) {
-        const roomDoc = await transaction.get(db.collection('rooms').doc(room.room_id));
-        if (!roomDoc.exists) {
-          throw new Error(`部屋ID ${room.room_id} が見つかりません`);
-        }
-        roomDocs.push({ doc: roomDoc, roomData: room });
-      }
+    // 🎯 新IDシステムで統合予約を作成
+    const newBookingId = generateNewBookingId();
+    
+    const unifiedBookingData = {
+      id: newBookingId,
+      user_id,
+      check_in_date,
+      check_out_date,
+      status: 'confirmed',
+      total_guests: rooms.reduce((total, room) => total + room.guests.length, 0),
+      primary_contact,
+      total_amount: rooms.reduce((total, room) => total + room.price, 0),
+      
+      // 統合予約の部屋情報
+      rooms: rooms.map(room => ({
+        room_id: room.room_id,
+        check_in_time: room.check_in_time || '14:00',
+        number_of_guests: room.guests.length,
+        primary_guest: room.guests[0],
+        additional_guests: room.guests.slice(1),
+        room_amount: room.price
+      })),
+      
+      // メタデータ
+      created_at: admin.firestore.FieldValue.serverTimestamp(),
+      updated_at: admin.firestore.FieldValue.serverTimestamp(),
+      created_by: user_id,
+      system_version: '2.0_NEW_ID_SYSTEM',
+      booking_type: 'unified_booking'
+    };
 
-      // 🔥 【修正2】性別制限のバリデーション（読み取り完了後）
-      for (const { doc, roomData } of roomDocs) {
-        const roomInfo = doc.data();
-        
-        if (roomInfo.gender_restriction !== 'none') {
-          const genderMismatch = roomData.guests.some(
-            guest => guest.gender !== roomInfo.gender_restriction
-          );
+    // Firestoreに保存
+    await db.collection('bookings').doc(newBookingId).set(unifiedBookingData);
 
-          if (genderMismatch) {
-            throw new Error(
-              `部屋 ${roomInfo.name} は ${
-                roomInfo.gender_restriction === 'male' ? '男性' : '女性'
-              } 専用です`
-            );
-          }
-        }
-      }
-
-      // 🔥 【修正3】ここから書き込み操作のみ
-      // 親予約の作成
-      const parentBookingRef = db.collection('parent_bookings').doc();
-      const parentBookingId = parentBookingRef.id;
-
-      const parentBookingData = {
-        id: parentBookingId,
-        user_id,
-        check_in_date,
-        check_out_date,
-        status: 'confirmed',
-        is_early_arrival: false,
-        total_guests: rooms.reduce((total, room) => total + room.guests.length, 0),
-        primary_contact,
-        total_amount: rooms.reduce((total, room) => total + room.price, 0),
-        child_bookings: [],
-        created_at: admin.firestore.FieldValue.serverTimestamp(),
-        updated_at: admin.firestore.FieldValue.serverTimestamp(),
-        created_by: user_id,
-      };
-
-      transaction.set(parentBookingRef, parentBookingData);
-
-      // 子予約の作成
-      const childBookingIds = [];
-      for (let i = 0; i < rooms.length; i++) {
-        const room = rooms[i];
-        const { doc } = roomDocs[i];
-        const roomInfo = doc.data();
-
-        // 子予約の作成
-        const childBookingRef = db.collection('bookings').doc();
-        const childBookingId = childBookingRef.id;
-        childBookingIds.push(childBookingId);
-
-        const childBookingData = {
-          id: childBookingId,
-          parent_booking_id: parentBookingId,
-          user_id,
-          room_id: room.room_id,
-          check_in_date,
-          check_in_time: room.check_in_time || '14:00',
-          check_out_date,
-          status: 'confirmed',
-          number_of_guests: room.guests.length,
-          primary_guest: room.guests[0],
-          additional_guests: room.guests.slice(1),
-          total_amount: room.price,
-          created_at: admin.firestore.FieldValue.serverTimestamp(),
-          updated_at: admin.firestore.FieldValue.serverTimestamp(),
-        };
-
-        transaction.set(childBookingRef, childBookingData);
-
-        // バリデーション記録の作成
-        const validationRef = db.collection('booking_validations').doc();
-        transaction.set(validationRef, {
-          id: validationRef.id,
-          booking_id: childBookingId,
-          validation_type: 'gender_restriction',
-          status: 'passed',
-          details: `${
-            roomInfo.gender_restriction !== 'none'
-              ? (roomInfo.gender_restriction === 'male' ? '男性' : '女性') +
-                '専用ドミトリーの予約は'
-              : ''
-          }正常に検証されました`,
-          created_at: admin.firestore.FieldValue.serverTimestamp(),
-        });
-
-        // 空室状況の更新
-        const dateRange = getDateRange(check_in_date, check_out_date);
-        for (const date of dateRange) {
-          const availabilityRef = db.collection('availability').doc();
-          transaction.set(availabilityRef, {
-            id: availabilityRef.id,
-            room_id: room.room_id,
-            date,
-            status: 'booked',
-            booking_id: childBookingId,
-            price_override: null,
-            reason: null,
-            updated_at: admin.firestore.FieldValue.serverTimestamp(),
-          });
-        }
-      }
-
-      // 親予約に子予約IDを追加
-      transaction.update(parentBookingRef, {
-        child_bookings: childBookingIds,
-      });
-
-      return {
-        parent_booking_id: parentBookingId,
-        child_booking_ids: childBookingIds,
-      };
-    });
-
-    console.log('予約が作成されました:', result);
+    console.log('✅ 新IDシステム予約作成成功:', newBookingId);
+    
     res.status(201).json({
       message: '予約が作成されました',
-      ...result,
+      booking_id: newBookingId,
+      total_amount: unifiedBookingData.total_amount,
+      total_guests: unifiedBookingData.total_guests,
+      system_version: '2.0_NEW_ID_SYSTEM'
     });
+    
   } catch (error) {
-    console.error('予約の作成中にエラーが発生しました:', error);
+    console.error('❌ 予約の作成中にエラーが発生しました:', error);
     res.status(500).json({ error: error.message || 'サーバーエラーが発生しました' });
   }
 };
 
-// 予約を更新
+// 予約を更新 (新IDシステム対応)
 exports.updateBooking = async (req, res) => {
   try {
     const bookingId = req.params.id;
     const updateData = req.body;
 
-    console.log('予約更新リクエスト:', { bookingId, updateData });
+    console.log('🔥 新IDシステム - 予約更新リクエスト:', { bookingId, updateData });
 
-    // parentBooking のみ更新可能
-    const bookingRef = db.collection('parent_bookings').doc(bookingId);
+    if (!bookingId.startsWith('B_')) {
+      return res.status(400).json({ 
+        error: '新IDシステムの予約IDが必要です',
+        expected_format: 'B_XXXXXXXXXXXX',
+        received: bookingId
+      });
+    }
+
+    const bookingRef = db.collection('bookings').doc(bookingId);
     const bookingDoc = await bookingRef.get();
 
     if (!bookingDoc.exists) {
@@ -269,7 +238,7 @@ exports.updateBooking = async (req, res) => {
     }
 
     // 更新可能なフィールドのみを抽出
-    const allowedFields = ['status', 'is_early_arrival', 'primary_contact'];
+    const allowedFields = ['status', 'primary_contact', 'total_guests', 'total_amount'];
 
     const filteredData = Object.keys(updateData)
       .filter(key => allowedFields.includes(key))
@@ -283,85 +252,76 @@ exports.updateBooking = async (req, res) => {
 
     await bookingRef.update(filteredData);
 
+    console.log('✅ 新IDシステム予約更新成功:', bookingId);
+
     res.status(200).json({
       message: '予約が更新されました',
+      booking_id: bookingId,
       updated_fields: Object.keys(filteredData),
     });
   } catch (error) {
-    console.error('予約の更新中にエラーが発生しました:', error);
+    console.error('❌ 予約の更新中にエラーが発生しました:', error);
     res.status(500).json({ error: 'サーバーエラーが発生しました', message: error.message });
   }
 };
 
-// 予約をキャンセル（修正版）
+// 予約をキャンセル (新IDシステム対応)
 exports.cancelBooking = async (req, res) => {
   try {
     const bookingId = req.params.id;
-    console.log('予約キャンセルリクエスト:', bookingId);
+    console.log('🔥 新IDシステム - 予約キャンセルリクエスト:', bookingId);
 
-    // トランザクション開始
-    await db.runTransaction(async transaction => {
-      // 🔥 【修正】すべての読み取り操作を先に実行
-      const parentBookingRef = db.collection('parent_bookings').doc(bookingId);
-      const parentBookingDoc = await transaction.get(parentBookingRef);
-
-      if (!parentBookingDoc.exists) {
-        throw new Error('予約が見つかりません');
-      }
-
-      const parentBookingData = parentBookingDoc.data();
-
-      // 空室状況の読み取り（子予約ごと）
-      const availabilitySnapshots = [];
-      for (const childBookingId of parentBookingData.child_bookings || []) {
-        const availabilitySnapshot = await db
-          .collection('availability')
-          .where('booking_id', '==', childBookingId)
-          .where('status', '==', 'booked')
-          .get();
-        availabilitySnapshots.push({ childBookingId, snapshot: availabilitySnapshot });
-      }
-
-      // 🔥 ここから書き込み操作のみ
-      // 親予約のステータスを更新
-      transaction.update(parentBookingRef, {
-        status: 'cancelled',
-        updated_at: admin.firestore.FieldValue.serverTimestamp(),
+    if (!bookingId.startsWith('B_')) {
+      return res.status(400).json({ 
+        error: '新IDシステムの予約IDが必要です',
+        expected_format: 'B_XXXXXXXXXXXX',
+        received: bookingId
       });
+    }
 
-      // 子予約のステータスを更新
-      for (const childBookingId of parentBookingData.child_bookings || []) {
-        const childBookingRef = db.collection('bookings').doc(childBookingId);
-        transaction.update(childBookingRef, {
-          status: 'cancelled',
-          updated_at: admin.firestore.FieldValue.serverTimestamp(),
-        });
-      }
+    const bookingRef = db.collection('bookings').doc(bookingId);
+    const bookingDoc = await bookingRef.get();
 
-      // 空室状況を更新（予約を解放）
-      for (const { snapshot } of availabilitySnapshots) {
-        snapshot.forEach(doc => {
-          transaction.update(doc.ref, {
-            status: 'available',
-            updated_at: admin.firestore.FieldValue.serverTimestamp(),
-          });
-        });
-      }
+    if (!bookingDoc.exists) {
+      return res.status(404).json({ error: '予約が見つかりません' });
+    }
+
+    // ステータスをキャンセルに更新
+    await bookingRef.update({
+      status: 'cancelled',
+      updated_at: admin.firestore.FieldValue.serverTimestamp(),
+      cancelled_at: admin.firestore.FieldValue.serverTimestamp()
     });
 
-    res.status(200).json({ message: '予約がキャンセルされました' });
+    console.log('✅ 新IDシステム予約キャンセル成功:', bookingId);
+
+    res.status(200).json({ 
+      message: '予約がキャンセルされました',
+      booking_id: bookingId
+    });
   } catch (error) {
-    console.error('予約のキャンセル中にエラーが発生しました:', error);
+    console.error('❌ 予約のキャンセル中にエラーが発生しました:', error);
     res.status(500).json({ error: 'サーバーエラーが発生しました', message: error.message });
   }
 };
 
-// 予約の確認 (バリデーション)
+// 予約の確認 (バリデーション) - 新IDシステム対応
 exports.validateBooking = async (req, res) => {
   try {
-    const { rooms } = req.body;
+    const { rooms, user_id } = req.body;
 
-    console.log('予約バリデーションリクエスト:', rooms);
+    console.log('🔥 新IDシステム - 予約バリデーションリクエスト:', { 
+      user_id, 
+      rooms_count: rooms?.length 
+    });
+
+    if (user_id && !user_id.startsWith('U_')) {
+      return res.status(400).json({ 
+        error: '新IDシステムのユーザーIDが必要です',
+        expected_format: 'U_XXXXXXXX',
+        received: user_id
+      });
+    }
 
     if (!rooms || !Array.isArray(rooms)) {
       return res.status(400).json({ error: '予約データが不正です' });
@@ -370,6 +330,16 @@ exports.validateBooking = async (req, res) => {
     const validationResults = [];
 
     for (const room of rooms) {
+      // 新IDシステムの部屋IDかチェック
+      if (room.room_id && !room.room_id.startsWith('R_')) {
+        validationResults.push({
+          room_id: room.room_id,
+          valid: false,
+          error: '新IDシステムの部屋IDが必要です (R_XXXXXX)',
+        });
+        continue;
+      }
+
       // 部屋情報を取得
       const roomDoc = await db.collection('rooms').doc(room.room_id).get();
 
@@ -384,7 +354,7 @@ exports.validateBooking = async (req, res) => {
 
       const roomData = roomDoc.data();
 
-      // 性別制限のチェック
+      // 各種チェック (性別制限、定員など)
       if (roomData.gender_restriction !== 'none') {
         const genderMismatch = room.guests.some(
           guest => guest.gender !== roomData.gender_restriction
@@ -400,7 +370,6 @@ exports.validateBooking = async (req, res) => {
         }
       }
 
-      // キャパシティのチェック
       if (room.guests.length > roomData.capacity) {
         validationResults.push({
           room_id: room.room_id,
@@ -418,27 +387,28 @@ exports.validateBooking = async (req, res) => {
 
     const isValid = validationResults.every(result => result.valid);
 
+    console.log('✅ 新IDシステムバリデーション完了:', { 
+      isValid, 
+      results_count: validationResults.length 
+    });
+
     res.status(200).json({
       valid: isValid,
       validation_results: validationResults,
+      system_version: '2.0_NEW_ID_SYSTEM'
     });
   } catch (error) {
-    console.error('予約バリデーション中にエラーが発生しました:', error);
+    console.error('❌ 予約バリデーション中にエラーが発生しました:', error);
     res.status(500).json({ error: 'サーバーエラーが発生しました', message: error.message });
   }
 };
 
-// 日付範囲を配列として取得するユーティリティ関数
-function getDateRange(startDate, endDate) {
-  const start = new Date(startDate);
-  const end = new Date(endDate);
-  const dateArray = [];
-  let currentDate = new Date(start);
-
-  while (currentDate < end) {
-    dateArray.push(currentDate.toISOString().split('T')[0]);
-    currentDate.setDate(currentDate.getDate() + 1);
+// 🎯 新IDシステム用のID生成関数
+function generateNewBookingId() {
+  const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+  let result = 'B_';
+  for (let i = 0; i < 12; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
   }
-
-  return dateArray;
+  return result;
 }
