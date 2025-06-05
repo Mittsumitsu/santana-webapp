@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 import '../styles/BookingForm.css';
 
 const BookingForm = ({ bookingData, onSubmit, loading }) => {
+  // 🎯 認証情報を正しく取得
+  const { getUserId, getUserData, currentUser } = useAuth();
+  
   const [formData, setFormData] = useState({
     primaryContact: {
       lastName: '',
@@ -19,6 +23,35 @@ const BookingForm = ({ bookingData, onSubmit, loading }) => {
 
   const [formError, setFormError] = useState(null);
   const [validationErrors, setValidationErrors] = useState({});
+
+  // 🎯 認証状態の確認
+  useEffect(() => {
+    const userId = getUserId();
+    const userData = getUserData();
+    
+    console.log('🎯 BookingForm認証情報確認:', {
+      userId,
+      userData: userData ? { id: userData.id, email: userData.email } : null,
+      currentUser: currentUser ? { uid: currentUser.uid, email: currentUser.email } : null
+    });
+    
+    if (!userId) {
+      setFormError('ユーザー認証情報が見つかりません。再ログインしてください。');
+      return;
+    }
+    
+    // ユーザー情報を自動入力
+    if (userData) {
+      setFormData(prev => ({
+        ...prev,
+        primaryContact: {
+          ...prev.primaryContact,
+          email: userData.email || currentUser?.email || '',
+          // 必要に応じて他の情報も自動入力
+        }
+      }));
+    }
+  }, [getUserId, getUserData, currentUser]);
 
   // bookingDataが変更されたときに初期化
   useEffect(() => {
@@ -184,6 +217,13 @@ const BookingForm = ({ bookingData, onSubmit, loading }) => {
 
   // フォーム検証
   const validateForm = () => {
+    // 🎯 認証情報の確認
+    const userId = getUserId();
+    if (!userId) {
+      setFormError('ユーザー認証情報が見つかりません。再ログインしてください。');
+      return false;
+    }
+
     // バリデーションエラーがある場合
     if (Object.keys(validationErrors).length > 0) {
       setFormError('入力内容に誤りがあります。赤色の警告を確認してください。');
@@ -251,9 +291,18 @@ const BookingForm = ({ bookingData, onSubmit, loading }) => {
       return;
     }
 
+    // 🎯 正しいユーザーIDを使用
+    const userId = getUserId();
+    const userData = getUserData();
+    
+    console.log('🎯 予約送信時の認証情報:', {
+      userId,
+      userData: userData ? { id: userData.id, email: userData.email } : null
+    });
+
     // APIに送信するデータ形式に変換
     const submitData = {
-      user_id: 'temp_user_' + Date.now(),
+      user_id: userId, // 🔥 新IDシステムのユーザーIDを使用
       check_in_date: bookingData.searchParams.checkIn,
       check_out_date: bookingData.searchParams.checkOut,
       primary_contact: {
@@ -277,6 +326,7 @@ const BookingForm = ({ bookingData, onSubmit, loading }) => {
       notes: formData.notes
     };
 
+    console.log('🎯 送信データ:', submitData);
     onSubmit(submitData);
   };
 

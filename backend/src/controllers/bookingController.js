@@ -32,7 +32,7 @@ exports.getAllBookings = async (req, res) => {
   }
 };
 
-// 🎯 新IDシステム対応: ユーザーIDで予約を取得
+// 🎯 新IDシステム対応: ユーザーIDで予約を取得（改善版）
 exports.getUserBookings = async (req, res) => {
   try {
     const userId = req.params.userId;
@@ -48,31 +48,62 @@ exports.getUserBookings = async (req, res) => {
       });
     }
 
-    // 🎯 統合予約コレクションから検索
+    console.log('🔍 予約検索開始 - ユーザーID:', userId);
+
+    // 🎯 統合予約コレクションから検索（改善版）
     const bookingsSnapshot = await db
       .collection('bookings')
       .where('user_id', '==', userId)
-      .orderBy('created_at', 'desc')
       .get();
 
-    console.log('🔍 取得した予約数:', bookingsSnapshot.size);
+    console.log('📊 クエリ結果:', bookingsSnapshot.size, '件');
 
     const bookings = [];
+    
     bookingsSnapshot.forEach(doc => {
       const bookingData = doc.data();
+      console.log('📋 予約データ確認:', {
+        docId: doc.id,
+        bookingId: bookingData.id,
+        userId: bookingData.user_id,
+        hasRooms: !!bookingData.rooms,
+        roomsCount: bookingData.rooms?.length || 0
+      });
       
-      // 新IDシステムの予約のみを対象
-      if (bookingData.id && bookingData.id.startsWith('B_')) {
-        console.log(`📅 予約発見: ${bookingData.id} - ${bookingData.check_in_date} to ${bookingData.check_out_date}`);
+      // 🔥 予約データの整形・補完（料金修正付き）
+      const formattedBooking = {
+        id: bookingData.id || doc.id,
+        user_id: bookingData.user_id,
+        check_in_date: bookingData.check_in_date,
+        check_out_date: bookingData.check_out_date,
+        status: bookingData.status || 'confirmed',
+        total_guests: bookingData.total_guests || 1,
+        total_amount: calculateCorrectAmount(bookingData), // 🔥 料金修正関数
+        primary_contact: bookingData.primary_contact || {
+          name_kanji: 'ゲスト',
+          name_romaji: 'GUEST',
+          email: 'guest@example.com'
+        },
         
-        bookings.push({
-          id: doc.id,
-          ...bookingData,
-          // フロントエンド表示用の追加情報
-          is_new_system: true,
-          display_format: 'unified_booking'
-        });
-      }
+        // 🔥 統合予約の部屋情報を処理
+        rooms: bookingData.rooms || [],
+        
+        // フロントエンド表示用の追加情報
+        created_at: bookingData.created_at || bookingData.updated_at || admin.firestore.FieldValue.serverTimestamp(),
+        updated_at: bookingData.updated_at || admin.firestore.FieldValue.serverTimestamp(),
+        is_new_system: true,
+        display_format: 'unified_booking',
+        migration_version: bookingData.migration_version || '2.0_UNIFIED_BOOKING'
+      };
+      
+      bookings.push(formattedBooking);
+    });
+
+    // 🔥 結果のソート（チェックイン日順 - 新しい予約が上に）
+    bookings.sort((a, b) => {
+      const dateA = new Date(a.check_in_date);
+      const dateB = new Date(b.check_in_date);
+      return dateB - dateA; // 新しいチェックイン日が上に
     });
 
     console.log(`✅ 新IDシステム予約返却: ${bookings.length} 件`);
@@ -80,15 +111,37 @@ exports.getUserBookings = async (req, res) => {
     // 詳細ログ
     bookings.forEach((booking, index) => {
       console.log(`  ${index + 1}. ${booking.id} - ₹${booking.total_amount} - ${booking.status}`);
+      console.log(`     チェックイン: ${booking.check_in_date} - 部屋数: ${booking.rooms?.length || 0}`);
     });
 
+    // 🔥 予約が見つからない場合も成功レスポンス
+    if (bookings.length === 0) {
+      console.log('📝 このユーザーの予約は見つかりませんでした');
+      return res.status(200).json([]);
+    }
+
     res.status(200).json(bookings);
+    
   } catch (error) {
     console.error('❌ ユーザー予約の取得中にエラーが発生しました:', error);
-    res.status(500).json({ 
-      error: 'サーバーエラーが発生しました', 
+    
+    // 🔥 詳細なエラー情報を提供
+    let errorMessage = 'サーバーエラーが発生しました';
+    let statusCode = 500;
+    
+    if (error.code === 'permission-denied') {
+      errorMessage = 'データベースへのアクセス権限がありません';
+      statusCode = 403;
+    } else if (error.code === 'unavailable') {
+      errorMessage = 'データベースに一時的に接続できません';
+      statusCode = 503;
+    }
+    
+    res.status(statusCode).json({ 
+      error: errorMessage,
       message: error.message,
-      userId: req.params.userId
+      userId: req.params.userId,
+      timestamp: new Date().toISOString()
     });
   }
 };
@@ -402,6 +455,38 @@ exports.validateBooking = async (req, res) => {
     res.status(500).json({ error: 'サーバーエラーが発生しました', message: error.message });
   }
 };
+
+// 🔥 料金修正関数
+function calculateCorrectAmount(bookingData) {
+  if (!bookingData.check_in_date || !bookingData.check_out_date) {
+    return bookingData.total_amount || 0;
+  }
+  
+  // 宿泊日数計算
+  const checkIn = new Date(bookingData.check_in_date);
+  const checkOut = new Date(bookingData.check_out_date);
+  const nights = Math.floor((checkOut - checkIn) / (1000 * 60 * 60 * 24));
+  
+  if (nights <= 0) return bookingData.total_amount || 0;
+  
+  // 部屋情報から正しい料金を計算
+  if (bookingData.rooms && bookingData.rooms.length > 0) {
+    const totalRoomAmount = bookingData.rooms.reduce((sum, room) => {
+      return sum + (room.room_amount || 1700); // デフォルト1泊1700ルピー
+    }, 0);
+    
+    const calculatedAmount = totalRoomAmount * nights;
+    const originalAmount = bookingData.total_amount || 0;
+    
+    // 大きな差がある場合は計算値を使用
+    if (Math.abs(originalAmount - calculatedAmount) > 500) {
+      console.log(`💰 サーバー側料金修正: ${bookingData.id} - 保存値:₹${originalAmount} → 計算値:₹${calculatedAmount}`);
+      return calculatedAmount;
+    }
+  }
+  
+  return bookingData.total_amount || 0;
+}
 
 // 🎯 新IDシステム用のID生成関数
 function generateNewBookingId() {

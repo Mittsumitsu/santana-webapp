@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import LoginForm from './auth/LoginForm';
@@ -10,6 +10,8 @@ const Header = () => {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState('login'); // 'login' or 'signup'
   const navigate = useNavigate();
+  const dropdownRef = useRef(null);
+  const timeoutRef = useRef(null);
   
   // 🎯 新IDフォーマット対応の認証情報取得
   const { currentUser, logout, getUserId, getUserData } = useAuth();
@@ -25,9 +27,45 @@ const Header = () => {
     displayName: userData?.displayName || currentUser?.displayName
   });
 
-  const handleDropdownToggle = () => {
+  // 🔧 改善されたドロップダウン制御
+  const handleMouseEnter = () => {
+    // タイムアウトをクリア（閉じる処理をキャンセル）
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    setDropdownOpen(true);
+  };
+
+  const handleMouseLeave = () => {
+    // 少し遅延させて閉じる（マウスが戻ってきた場合のため）
+    timeoutRef.current = setTimeout(() => {
+      setDropdownOpen(false);
+    }, 200); // 200ms の猶予時間
+  };
+
+  // クリックでも開閉できるように
+  const handleToggleDropdown = () => {
     setDropdownOpen(!dropdownOpen);
   };
+
+  // 外部クリックで閉じる
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      // クリーンアップ時にタイムアウトもクリア
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleMenuClick = (path) => {
     setDropdownOpen(false);
@@ -85,11 +123,15 @@ const Header = () => {
 
           <div className="auth-section">
             {isLoggedIn ? (
-              <div className="user-menu-container">
+              <div 
+                className="user-menu-container"
+                ref={dropdownRef}
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
+              >
                 <div 
                   className="user-menu-trigger"
-                  onMouseEnter={() => setDropdownOpen(true)}
-                  onMouseLeave={() => setDropdownOpen(false)}
+                  onClick={handleToggleDropdown}
                 >
                   {/* ユーザーアバター */}
                   <div className="user-avatar">
@@ -100,7 +142,7 @@ const Header = () => {
                   <span className="user-name">{displayUser.displayName}</span>
                   
                   {/* ドロップダウン矢印 */}
-                  <span className="dropdown-arrow">▼</span>
+                  <span className={`dropdown-arrow ${dropdownOpen ? 'open' : ''}`}>▼</span>
 
                   {/* ドロップダウンメニュー */}
                   {dropdownOpen && (
@@ -113,11 +155,11 @@ const Header = () => {
                           <div className="dropdown-details">
                             <div className="dropdown-name">{displayUser.displayName}</div>
                             <div className="dropdown-email">{displayUser.email}</div>
-                            <div className="dropdown-type">
-                              {displayUser.userType === 'guest' ? 'お客様' : '管理者'}
-                            </div>
-                            {/* 🎯 新IDフォーマット表示 */}
+                            {/* 🎯 新IDフォーマット表示（目立たないように） */}
                             <div className="dropdown-id">ID: {displayUser.userId}</div>
+                            <div className="dropdown-type">
+                              {displayUser.userType === 'guest' ? 'Guest' : 'Admin'}
+                            </div>
                           </div>
                         </div>
                       </div>

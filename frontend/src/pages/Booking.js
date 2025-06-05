@@ -24,12 +24,36 @@ const Booking = () => {
     if (!checkIn || !checkOut) return 1;
     const start = new Date(checkIn);
     const end = new Date(checkOut);
-    return Math.floor((end - start) / (1000 * 60 * 60 * 24));
+    const nights = Math.floor((end - start) / (1000 * 60 * 60 * 24));
+    return nights > 0 ? nights : 1; // 最小1泊
   };
 
-  // 正しい合計料金を計算（泊数分）
-  const calculateTotalPrice = (combination, nights) => {
-    return combination.total_price * nights;
+  // 🔥 料金計算の完全修正
+  const calculateCorrectPricing = () => {
+    if (!bookingData?.combination) return { basePrice: 1700, totalPrice: 1700, nights: 1 };
+    
+    const combination = bookingData.combination;
+    const searchParams = bookingData.searchParams;
+    
+    // 宿泊日数
+    const nights = calculateNights(searchParams.checkIn, searchParams.checkOut);
+    
+    // 🔥 重要: combination.total_price は1泊分の料金として扱う
+    const basePrice = combination.total_price; // 1泊分
+    const totalPrice = basePrice * nights; // 正しい合計金額
+    
+    console.log('🔥 Booking.js 料金計算:', {
+      'combination.total_price (1泊分)': basePrice,
+      '宿泊日数': nights,
+      '合計金額 (計算結果)': totalPrice,
+      '計算式': `₹${basePrice} × ${nights}泊 = ₹${totalPrice}`
+    });
+    
+    return {
+      basePrice: basePrice,
+      totalPrice: totalPrice,
+      nights: nights
+    };
   };
 
   // 予約送信処理
@@ -40,16 +64,35 @@ const Booking = () => {
     try {
       console.log('予約データ送信開始:', formData);
       
+      // 🔥 正しい料金計算
+      const pricing = calculateCorrectPricing();
+      
+      console.log('🔥 送信前料金確認:', {
+        '1泊分料金': pricing.basePrice,
+        '宿泊日数': pricing.nights,
+        '合計金額': pricing.totalPrice
+      });
+      
       // APIに送信
       const response = await createBooking(formData);
       
       console.log('予約送信成功:', response.data);
       
-      // 成功ページに遷移（予約結果とオリジナルデータを渡す）
+      // 🔥 成功ページに正確な料金データを渡す
       navigate('/booking-success', {
         state: {
-          bookingResult: response.data,
-          bookingData: bookingData
+          bookingResult: {
+            ...response.data,
+            total_amount: pricing.totalPrice // 🔥 正しい合計金額を明示的に設定
+          },
+          bookingData: {
+            ...bookingData,
+            // 🔥 料金計算の詳細を明示的に追加
+            calculatedTotalPrice: pricing.totalPrice,
+            basePrice: pricing.basePrice,
+            nights: pricing.nights,
+            originalCombinationPrice: bookingData.combination.total_price
+          }
         }
       });
       
@@ -97,8 +140,9 @@ const Booking = () => {
   }
 
   const { combination, searchParams } = bookingData;
-  const nights = calculateNights(searchParams.checkIn, searchParams.checkOut);
-  const totalPrice = calculateTotalPrice(combination, nights);
+  
+  // 🔥 表示用の正しい料金計算
+  const pricing = calculateCorrectPricing();
 
   return (
     <div className="booking-container">
@@ -139,7 +183,7 @@ const Booking = () => {
           </div>
           <div className="summary-item">
             <span className="summary-label">宿泊日数:</span>
-            <span className="summary-value">{nights}泊</span>
+            <span className="summary-value">{pricing.nights}泊</span>
           </div>
           <div className="summary-item">
             <span className="summary-label">宿泊者数:</span>
@@ -151,12 +195,31 @@ const Booking = () => {
           </div>
           <div className="summary-item total-price">
             <span className="summary-label">合計料金:</span>
-            <span className="summary-value price">₹{totalPrice.toLocaleString()}</span>
+            <span className="summary-value price">₹{pricing.totalPrice.toLocaleString()}</span>
           </div>
           <div className="summary-item price-breakdown">
             <span className="summary-label">内訳:</span>
-            <span className="summary-value">₹{combination.total_price.toLocaleString()} × {nights}泊</span>
+            <span className="summary-value">₹{pricing.basePrice.toLocaleString()} × {pricing.nights}泊</span>
           </div>
+          
+          {/* 🔧 デバッグ情報（開発中のみ表示） */}
+          {process.env.NODE_ENV === 'development' && (
+            <div className="debug-info" style={{ 
+              background: '#f9f9f9', 
+              border: '1px solid #ddd',
+              padding: '8px', 
+              margin: '10px 0', 
+              fontSize: '11px',
+              borderRadius: '4px'
+            }}>
+              <strong>🔧 Booking.js 料金デバッグ:</strong><br/>
+              combination.total_price: ₹{combination.total_price}<br/>
+              宿泊日数: {pricing.nights}泊<br/>
+              1泊分料金: ₹{pricing.basePrice}<br/>
+              合計金額: ₹{pricing.totalPrice}<br/>
+              計算式: ₹{pricing.basePrice} × {pricing.nights} = ₹{pricing.totalPrice}
+            </div>
+          )}
         </div>
         
         <button className="back-btn" onClick={handleGoBack}>

@@ -47,54 +47,9 @@ const UserDashboard = () => {
         }
       });
       
-      // 🎯 新IDフォーマットで予約データを取得
+      // 🔥 予約データ取得の改善
       if (userId) {
-        try {
-          console.log('📋 予約履歴取得開始:', userId);
-          
-          const response = await axios.get(`http://localhost:3000/api/bookings/user/${userId}`, {
-            timeout: 10000,
-            headers: {
-              'Content-Type': 'application/json',
-            }
-          });
-          
-          console.log('✅ 予約データ取得成功:', response.data);
-          
-          if (response.data && Array.isArray(response.data)) {
-            setBookings(response.data);
-            console.log(`📊 ${response.data.length}件の予約を取得`);
-          } else {
-            console.log('📝 予約データが空です');
-            setBookings([]);
-          }
-          
-        } catch (apiError) {
-          console.error('❌ 予約API呼び出しエラー:', apiError);
-          
-          // 🎯 現行データでフォールバック（開発中表示用）
-          console.log('🔧 開発中 - サンプルデータを表示');
-          const mockBookings = [
-            {
-              id: "B_5PMGVWYHSWPL",
-              check_in_date: "2025-07-06",
-              check_out_date: "2025-07-08", 
-              status: "confirmed",
-              number_of_guests: 2,
-              room_amount: 2300,
-              total_amount: 2300,
-              room_name: "デラックスルーム",
-              room_type: "deluxe",
-              primary_contact: {
-                name_kanji: "テスト 次郎",
-                email: "jiro@test.com"
-              },
-              created_at: "2025-06-04T22:35:50.000Z"
-            }
-          ];
-          setBookings(mockBookings);
-          setError('新IDシステム移行中です。モックデータを表示しています。');
-        }
+        await fetchUserBookings(userId);
       } else {
         console.log('⚠️ ユーザーIDが取得できませんでした');
         setError('ユーザーIDを取得できませんでした。再ログインしてください。');
@@ -105,6 +60,173 @@ const UserDashboard = () => {
       setError('データの読み込みに失敗しました: ' + err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // 🔥 予約データ取得の専用関数
+  const fetchUserBookings = async (userId) => {
+    try {
+      console.log('📋 予約履歴取得開始:', userId);
+      
+      // 🎯 新IDシステム対応: 統合予約APIを使用
+      const response = await axios.get(`http://localhost:3000/api/bookings/user/${userId}`, {
+        timeout: 10000,
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+      
+      console.log('✅ 予約データ取得成功:', response.data);
+      
+      if (response.data && Array.isArray(response.data)) {
+        // 🔥 予約データの整形と検証（料金計算修正版）
+        const validBookings = response.data.filter(booking => booking && booking.id);
+        
+        // 各予約データの構造を確認・修正
+        const formattedBookings = validBookings.map(booking => {
+          // 🔥 料金の正確な計算
+          let correctedAmount = booking.total_amount || 0;
+          
+          // 宿泊日数を計算
+          const checkIn = new Date(booking.check_in_date);
+          const checkOut = new Date(booking.check_out_date);
+          const nights = Math.floor((checkOut - checkIn) / (1000 * 60 * 60 * 24));
+          
+          // 🔥 料金が明らかに間違っている場合の修正
+          if (booking.rooms && booking.rooms.length > 0) {
+            // 部屋情報から正しい料金を再計算
+            const totalRoomAmount = booking.rooms.reduce((sum, room) => {
+              return sum + (room.room_amount || 1700); // デフォルト1泊1700ルピー
+            }, 0);
+            
+            // 泊数を考慮した正しい金額
+            const calculatedAmount = totalRoomAmount * nights;
+            
+            // 🔥 保存されている金額と計算結果が大きく異なる場合は修正
+            if (Math.abs(correctedAmount - calculatedAmount) > 500) {
+              console.log(`💰 料金修正: ${booking.id} - 保存値:₹${correctedAmount} → 計算値:₹${calculatedAmount}`);
+              correctedAmount = calculatedAmount;
+            }
+          }
+          
+          return {
+            id: booking.id || `booking_${Date.now()}`,
+            check_in_date: booking.check_in_date,
+            check_out_date: booking.check_out_date,
+            status: booking.status || 'confirmed',
+            total_guests: booking.total_guests || 1,
+            total_amount: correctedAmount, // 🔥 修正された料金
+            primary_contact: booking.primary_contact || {
+              name_kanji: 'ゲスト',
+              email: currentUser?.email || ''
+            },
+            // 🔥 統合予約の部屋情報を処理
+            rooms: booking.rooms || [],
+            room_name: booking.rooms && booking.rooms.length > 0 ? 
+              booking.rooms.map(room => room.room_name || 'お部屋').join(', ') : 
+              'デラックスルーム',
+            room_type: booking.rooms && booking.rooms.length > 0 ? 
+              booking.rooms[0].room_type || 'deluxe' : 
+              'deluxe',
+            created_at: booking.created_at || booking.updated_at || new Date().toISOString(),
+            is_unified_booking: true,
+            // 🔥 料金計算の詳細情報
+            nights: nights,
+            price_corrected: Math.abs(booking.total_amount - correctedAmount) > 500
+          };
+        });
+        
+        setBookings(formattedBookings);
+        console.log(`📊 ${formattedBookings.length}件の予約を表示準備完了`);
+        
+        // エラーメッセージをクリア
+        if (error && error.includes('モックデータ')) {
+          setError(null);
+        }
+        
+      } else {
+        console.log('📝 予約データが空です');
+        setBookings([]);
+      }
+      
+    } catch (apiError) {
+      console.error('❌ 予約API呼び出しエラー:', apiError);
+      
+      // 🔥 エラーの詳細分析
+      if (apiError.response) {
+        if (apiError.response.status === 404) {
+          // ユーザーの予約が存在しない（正常）
+          console.log('📝 このユーザーの予約はまだありません');
+          setBookings([]);
+          setError(null);
+        } else if (apiError.response.status === 400) {
+          // 新IDシステムのユーザーIDが必要
+          setError('新IDシステムのユーザーIDが必要です。再ログインしてください。');
+        } else {
+          setError(`サーバーエラー: ${apiError.response.status}`);
+        }
+      } else if (apiError.code === 'ECONNABORTED') {
+        setError('サーバーへの接続がタイムアウトしました。');
+      } else {
+        setError('予約データの取得に失敗しました。');
+      }
+      
+      // 🔥 フォールバック: 最近作成された予約を表示
+      try {
+        await fetchRecentBookings();
+      } catch (fallbackError) {
+        console.error('❌ フォールバック予約取得も失敗:', fallbackError);
+        setBookings([]);
+      }
+    }
+  };
+
+  // 🔥 最近の予約を取得するフォールバック関数
+  const fetchRecentBookings = async () => {
+    try {
+      console.log('🔄 フォールバック: 最近の予約を取得中...');
+      
+      // 全予約を取得して、現在のユーザーの予約を探す
+      const allBookingsResponse = await axios.get('http://localhost:3000/api/bookings', {
+        timeout: 5000
+      });
+      
+      if (allBookingsResponse.data && Array.isArray(allBookingsResponse.data)) {
+        const userId = getUserId();
+        const userEmail = currentUser?.email;
+        
+        // ユーザーIDまたはメールアドレスで予約を絞り込み
+        const userBookings = allBookingsResponse.data.filter(booking => {
+          return booking.user_id === userId || 
+                 booking.primary_contact?.email === userEmail;
+        });
+        
+        if (userBookings.length > 0) {
+          console.log(`🔍 フォールバックで ${userBookings.length} 件の予約を発見`);
+          
+          const formattedBookings = userBookings.map(booking => ({
+            id: booking.id,
+            check_in_date: booking.check_in_date,
+            check_out_date: booking.check_out_date,
+            status: booking.status || 'confirmed',
+            total_guests: booking.total_guests || 1,
+            total_amount: booking.total_amount || 0,
+            primary_contact: booking.primary_contact,
+            rooms: booking.rooms || [],
+            room_name: booking.rooms && booking.rooms.length > 0 ? 
+              booking.rooms.map(room => room.room_name || 'お部屋').join(', ') : 
+              'デラックスルーム',
+            room_type: 'deluxe',
+            created_at: booking.created_at || new Date().toISOString(),
+            is_fallback_data: true
+          }));
+          
+          setBookings(formattedBookings);
+          setError(null);
+        }
+      }
+    } catch (error) {
+      console.error('❌ フォールバック取得失敗:', error);
     }
   };
 
@@ -146,18 +268,22 @@ const UserDashboard = () => {
   };
 
   const calculateNights = (checkIn, checkOut) => {
+    if (!checkIn || !checkOut) return 1;
     const start = new Date(checkIn);
     const end = new Date(checkOut);
-    return Math.floor((end - start) / (1000 * 60 * 60 * 24));
+    const nights = Math.floor((end - start) / (1000 * 60 * 60 * 24));
+    return nights > 0 ? nights : 1;
   };
 
   const handleRebook = (booking) => {
     const searchParams = new URLSearchParams({
       checkIn: booking.check_in_date,
       checkOut: booking.check_out_date,
-      totalGuests: booking.number_of_guests,
+      totalGuests: booking.total_guests,
       // 🎯 部屋IDから店舗を推測
-      location: booking.room_id?.split('-')[0] || 'delhi'
+      location: booking.rooms && booking.rooms.length > 0 && booking.rooms[0].room_id ? 
+        booking.rooms[0].room_id.split('-')[0] || 'delhi' : 
+        'delhi'
     });
     
     window.location.href = `/?${searchParams.toString()}`;
@@ -253,10 +379,12 @@ const UserDashboard = () => {
           <div className="bookings-section">
             <div className="section-header">
               <h2>予約履歴</h2>
-              <p>新IDフォーマット対応 - 現行データを表示</p>
+              <p>🔥 新IDシステム対応 - 統合予約データ表示</p>
               {bookings.length > 0 && (
                 <div className="data-source">
-                  {error ? '🔧 開発中データ' : '🔥 Firestoreから取得'}
+                  {bookings.some(b => b.is_fallback_data) ? '🔄 フォールバックデータ' : 
+                   bookings.some(b => b.is_unified_booking) ? '🔥 統合予約システム' : 
+                   '📊 Firestoreから取得'}
                 </div>
               )}
             </div>
@@ -265,7 +393,7 @@ const UserDashboard = () => {
               <div className="empty-state">
                 <div className="empty-icon">📋</div>
                 <h3>予約履歴がありません</h3>
-                <p>新しい予約を作成してテストしてみましょう。</p>
+                <p>新しい予約を作成してみましょう。新IDシステムで管理されます。</p>
                 <button 
                   className="primary-btn"
                   onClick={() => window.location.href = '/'}
@@ -290,10 +418,55 @@ const UserDashboard = () => {
                     <div className="booking-details">
                       <div className="booking-info">
                         <p><strong>予約ID:</strong> {booking.id}</p>
-                        <p><strong>ゲスト数:</strong> {booking.number_of_guests}名</p>
-                        <p><strong>部屋:</strong> {booking.room_name || booking.room_type}</p>
-                        <p><strong>金額:</strong> ₹{booking.total_amount?.toLocaleString()}</p>
+                        <p><strong>ゲスト数:</strong> {booking.total_guests}名</p>
+                        <p><strong>部屋:</strong> {booking.room_name}</p>
+                        <p><strong>金額:</strong> 
+                          ₹{booking.total_amount?.toLocaleString()}
+                          {booking.price_corrected && (
+                            <span style={{ color: '#4CAF50', fontSize: '12px', marginLeft: '8px' }}>
+                              (料金修正済み)
+                            </span>
+                          )}
+                        </p>
                         <p><strong>予約日時:</strong> {formatDate(booking.created_at)}</p>
+                        
+                        {/* 🔥 料金詳細表示 */}
+                        {booking.nights && (
+                          <p><strong>宿泊詳細:</strong> {booking.nights}泊 
+                            {booking.rooms && booking.rooms.length > 0 && 
+                             ` (1泊 ₹${Math.round(booking.total_amount / booking.nights).toLocaleString()})`
+                            }
+                          </p>
+                        )}
+                        
+                        {/* 🔥 統合予約の詳細情報 */}
+                        {booking.rooms && booking.rooms.length > 0 && (
+                          <div className="rooms-details">
+                            <p><strong>予約部屋:</strong></p>
+                            <ul>
+                              {booking.rooms.map((room, index) => (
+                                <li key={index}>
+                                  {room.room_name || `部屋${index + 1}`} - {room.number_of_guests}名
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        
+                        {/* デバッグ情報（開発環境のみ） */}
+                        {process.env.NODE_ENV === 'development' && (
+                          <details style={{ fontSize: '12px', marginTop: '10px' }}>
+                            <summary>🔧 技術情報</summary>
+                            <pre style={{ background: '#f5f5f5', padding: '5px', fontSize: '10px' }}>
+                              {JSON.stringify({
+                                id: booking.id,
+                                is_unified: booking.is_unified_booking,
+                                is_fallback: booking.is_fallback_data,
+                                rooms_count: booking.rooms?.length || 0
+                              }, null, 2)}
+                            </pre>
+                          </details>
+                        )}
                       </div>
                     </div>
                     

@@ -34,7 +34,7 @@ const PendingVerificationBanner = () => {
       setLoading(true);
       setMessage('');
       
-      const result = await sendVerificationEmail();
+      await sendVerificationEmail(); // result 変数を削除
       setMessage('📧 認証メールを再送信しました。メールボックスを確認してください。');
       setCountdown(60); // 60秒のクールダウン
       
