@@ -1,4 +1,4 @@
-// src/firebase/config.js
+// 🇯🇵 日本語認証メール対応版 src/firebase/config.js
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
@@ -14,7 +14,7 @@ const firebaseConfig = {
   measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID
 };
 
-// 🔍 デバッグ用ログ（一時的に追加）
+// 🔍 デバッグ用ログ
 console.log('🔥 Firebase設定チェック:', {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY ? '✅ 設定済み' : '❌ 未設定',
   authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN ? '✅ 設定済み' : '❌ 未設定',
@@ -24,7 +24,6 @@ console.log('🔥 Firebase設定チェック:', {
   appId: process.env.REACT_APP_FIREBASE_APP_ID ? '✅ 設定済み' : '❌ 未設定',
 });
 
-// プロジェクトID確認
 console.log('🆔 プロジェクトID:', process.env.REACT_APP_FIREBASE_PROJECT_ID);
 
 // Firebase初期化
@@ -32,6 +31,9 @@ const app = initializeApp(firebaseConfig);
 
 // Firebase Authentication
 export const auth = getAuth(app);
+
+// 🇯🇵 日本語設定
+auth.languageCode = 'ja';
 
 // Firestore Database
 export const db = getFirestore(app);

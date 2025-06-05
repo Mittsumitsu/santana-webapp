@@ -1,0 +1,249 @@
+/* BookingAccessControl.css */
+
+.access-control-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  }
+  
+  .access-denied,
+  .access-limited {
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+  
+  .access-denied-icon,
+  .access-limited-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+  }
+  
+  .access-denied h2,
+  .access-limited h2 {
+    color: #2c3e50;
+    margin-bottom: 1rem;
+    font-size: 1.8rem;
+    font-weight: 600;
+  }
+  
+  .access-denied p,
+  .access-limited p {
+    color: #7f8c8d;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+  }
+  
+  .access-denied-actions {
+    margin-top: 2rem;
+  }
+  
+  .login-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .login-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  }
+  
+  .verification-steps {
+    background: #f8f9ff;
+    border: 1px solid #e3e8ff;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 2rem 0;
+    text-align: left;
+  }
+  
+  .verification-steps h3 {
+    color: #667eea;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    text-align: center;
+  }
+  
+  .verification-steps ol {
+    list-style: none;
+    counter-reset: step-counter;
+    padding: 0;
+  }
+  
+  .verification-steps li {
+    counter-increment: step-counter;
+    margin-bottom: 1rem;
+    padding-left: 3rem;
+    position: relative;
+  }
+  
+  .verification-steps li:before {
+    content: counter(step-counter);
+    position: absolute;
+    left: 0;
+    top: 0;
+    background: #667eea;
+    color: white;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.9rem;
+  }
+  
+  .verification-steps strong {
+    color: #2c3e50;
+    display: block;
+    margin-bottom: 0.25rem;
+  }
+  
+  .help-section {
+    background: #f8fffe;
+    border: 1px solid #e0f4f3;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-top: 2rem;
+    text-align: left;
+  }
+  
+  .help-section h4 {
+    color: #00695c;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    text-align: center;
+  }
+  
+  .help-section details {
+    margin-bottom: 0.75rem;
+    border: 1px solid #b2dfdb;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  
+  .help-section summary {
+    background: #e0f2f1;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    font-weight: 500;
+    color: #00695c;
+    transition: background-color 0.2s ease;
+  }
+  
+  .help-section summary:hover {
+    background: #b2dfdb;
+  }
+  
+  .help-content {
+    padding: 1rem;
+    background: white;
+  }
+  
+  .help-content ul {
+    margin: 0;
+    padding-left: 1.5rem;
+  }
+  
+  .help-content li {
+    margin-bottom: 0.5rem;
+    color: #455a64;
+  }
+  
+  /* 予約ボタンのスタイル */
+  .booking-button {
+    background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 120px;
+  }
+  
+  .booking-button:hover:not(.booking-button-disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+  }
+  
+  .booking-button-disabled {
+    background: linear-gradient(135deg, #bdbdbd 0%, #9e9e9e 100%);
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+  
+  .booking-button-disabled:hover {
+    transform: none;
+    box-shadow: none;
+  }
+  
+  /* レスポンシブ対応 */
+  @media (max-width: 768px) {
+    .access-denied,
+    .access-limited {
+      margin: 1rem;
+      padding: 1.5rem;
+    }
+    
+    .access-denied-icon,
+    .access-limited-icon {
+      font-size: 3rem;
+    }
+    
+    .access-denied h2,
+    .access-limited h2 {
+      font-size: 1.5rem;
+    }
+    
+    .verification-steps {
+      padding: 1rem;
+    }
+    
+    .verification-steps li {
+      padding-left: 2.5rem;
+    }
+    
+    .verification-steps li:before {
+      width: 1.5rem;
+      height: 1.5rem;
+      font-size: 0.8rem;
+    }
+    
+    .help-section {
+      padding: 1rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .access-denied,
+    .access-limited {
+      margin: 0.5rem;
+      padding: 1rem;
+    }
+    
+    .login-btn {
+      width: 100%;
+      padding: 0.875rem;
+    }
+    
+    .booking-button {
+      width: 100%;
+      padding: 0.875rem;
+    }
+  }

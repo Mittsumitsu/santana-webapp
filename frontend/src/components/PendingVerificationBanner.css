@@ -1,0 +1,293 @@
+/* PendingVerificationBanner.css */
+
+.pending-verification-banner {
+    background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+    color: white;
+    padding: 1.5rem 0;
+    box-shadow: 0 4px 12px rgba(255, 152, 0, 0.2);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    margin-bottom: 1rem;
+  }
+  
+  .banner-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+  
+  .banner-icon {
+    font-size: 2.5rem;
+    flex-shrink: 0;
+    animation: pulse 2s infinite;
+  }
+  
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+  }
+  
+  .banner-text {
+    flex: 1;
+    min-width: 300px;
+  }
+  
+  .banner-text h3 {
+    margin: 0 0 0.75rem 0;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #fff;
+  }
+  
+  .banner-text p {
+    margin: 0;
+    font-size: 1rem;
+    opacity: 0.95;
+    line-height: 1.5;
+  }
+  
+  .banner-text strong {
+    color: #fff3e0;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+  
+  .banner-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  
+  .resend-btn,
+  .check-btn,
+  .logout-btn {
+    padding: 0.75rem 1.25rem;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+  }
+  
+  .resend-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+  }
+  
+  .resend-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-1px);
+  }
+  
+  .resend-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+  
+  .check-btn {
+    background: white;
+    color: #f57c00;
+    border: 2px solid white;
+  }
+  
+  .check-btn:hover:not(:disabled) {
+    background: #fff3e0;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .check-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+  }
+  
+  .logout-btn {
+    background: transparent;
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    font-size: 0.85rem;
+    padding: 0.6rem 1rem;
+  }
+  
+  .logout-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.6);
+    transform: translateY(-1px);
+  }
+  
+  .loading {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .loading-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  
+  .check-btn .loading-spinner {
+    border: 2px solid rgba(245, 124, 0, 0.3);
+    border-top: 2px solid #f57c00;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  .banner-message {
+    max-width: 1200px;
+    margin: 1rem auto 0;
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+  
+  .banner-message.success {
+    background: rgba(76, 175, 80, 0.2);
+    border: 1px solid rgba(76, 175, 80, 0.4);
+    color: #e8f5e8;
+  }
+  
+  .banner-message.error {
+    background: rgba(244, 67, 54, 0.2);
+    border: 1px solid rgba(244, 67, 54, 0.4);
+    color: #ffebee;
+  }
+  
+  .banner-message.info {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.95);
+  }
+  
+  .verification-help {
+    max-width: 1200px;
+    margin: 1rem auto 0;
+    padding: 0 1rem;
+  }
+  
+  .verification-help details {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  
+  .verification-help summary {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    font-weight: 500;
+    color: white;
+    transition: background-color 0.2s ease;
+  }
+  
+  .verification-help summary:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+  
+  .help-content {
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+  }
+  
+  .help-content ul {
+    margin: 0;
+    padding-left: 1.5rem;
+  }
+  
+  .help-content li {
+    margin-bottom: 0.5rem;
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.4;
+  }
+  
+  /* レスポンシブ対応 */
+  @media (max-width: 768px) {
+    .banner-content {
+      flex-direction: column;
+      text-align: center;
+      gap: 1.25rem;
+    }
+    
+    .banner-text {
+      min-width: auto;
+      text-align: center;
+    }
+    
+    .banner-actions {
+      justify-content: center;
+      width: 100%;
+    }
+    
+    .resend-btn,
+    .check-btn {
+      flex: 1;
+      justify-content: center;
+      min-width: 140px;
+    }
+    
+    .logout-btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .pending-verification-banner {
+      padding: 1rem 0;
+    }
+    
+    .banner-content {
+      padding: 0 0.75rem;
+    }
+    
+    .banner-icon {
+      font-size: 2rem;
+    }
+    
+    .banner-text h3 {
+      font-size: 1.1rem;
+    }
+    
+    .banner-text p {
+      font-size: 0.9rem;
+    }
+    
+    .banner-actions {
+      flex-direction: column;
+      width: 100%;
+      gap: 0.5rem;
+    }
+    
+    .resend-btn,
+    .check-btn,
+    .logout-btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }

@@ -1,0 +1,195 @@
+/* EmailVerificationBanner.css */
+
+.email-verification-banner {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1rem 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    margin-bottom: 1rem;
+  }
+  
+  .banner-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  
+  .banner-icon {
+    font-size: 2rem;
+    flex-shrink: 0;
+  }
+  
+  .banner-text {
+    flex: 1;
+    min-width: 300px;
+  }
+  
+  .banner-text h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+  
+  .banner-text p {
+    margin: 0;
+    font-size: 0.9rem;
+    opacity: 0.9;
+    line-height: 1.4;
+  }
+  
+  .banner-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+  
+  .verify-btn,
+  .check-btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .verify-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+  }
+  
+  .verify-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-1px);
+  }
+  
+  .verify-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+  
+  .check-btn {
+    background: white;
+    color: #667eea;
+    border: 2px solid white;
+  }
+  
+  .check-btn:hover:not(:disabled) {
+    background: #f8f9ff;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .check-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+  
+  .loading {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .loading-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  
+  .check-btn .loading-spinner {
+    border: 2px solid rgba(102, 126, 234, 0.3);
+    border-top: 2px solid #667eea;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  .banner-message {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0.75rem 1rem;
+    margin-top: 0.75rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+  
+  .banner-message.success {
+    background: rgba(76, 175, 80, 0.2);
+    border: 1px solid rgba(76, 175, 80, 0.4);
+    color: #e8f5e8;
+  }
+  
+  .banner-message.error {
+    background: rgba(244, 67, 54, 0.2);
+    border: 1px solid rgba(244, 67, 54, 0.4);
+    color: #ffebee;
+  }
+  
+  .banner-message.info {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.9);
+  }
+  
+  /* レスポンシブ対応 */
+  @media (max-width: 768px) {
+    .banner-content {
+      flex-direction: column;
+      text-align: center;
+      gap: 1rem;
+    }
+    
+    .banner-text {
+      min-width: auto;
+    }
+    
+    .banner-actions {
+      justify-content: center;
+      width: 100%;
+    }
+    
+    .verify-btn,
+    .check-btn {
+      flex: 1;
+      justify-content: center;
+      min-width: 140px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .banner-content {
+      padding: 0 0.75rem;
+    }
+    
+    .banner-actions {
+      flex-direction: column;
+      width: 100%;
+    }
+    
+    .verify-btn,
+    .check-btn {
+      width: 100%;
+    }
+  }

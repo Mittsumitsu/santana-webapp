@@ -1,8 +1,25 @@
-body {
-  font-family: 'Helvetica Neue', Arial, sans-serif;
+/* 📧 メール認証対応版 App.css */
+
+* {
   margin: 0;
   padding: 0;
-  background-color: #f5f5f5;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f8f9fa;
+  color: #333;
+  line-height: 1.6;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
 }
 
 .app {
@@ -11,55 +28,310 @@ body {
   flex-direction: column;
 }
 
-.app-header {
-  background-color: #333;
-  color: white;
-  padding: 15px 0;
+.app-main {
+  flex: 1;
+  min-height: calc(100vh - 200px);
 }
 
-.header-content {
+/* フッター関連 */
+.app-footer {
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+  color: white;
+  padding: 2rem 0 1rem;
+  margin-top: auto;
+}
+
+.footer-content {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  padding: 0 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
 }
 
-.app-header h1 {
-  margin: 0;
-  font-size: 1.5rem;
+.footer-section h4 {
+  color: #ecf0f1;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  font-weight: 600;
 }
 
-.app-header nav ul {
-  display: flex;
+.footer-section p {
+  color: #bdc3c7;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.footer-section ul {
   list-style: none;
-  margin: 0;
   padding: 0;
 }
 
-.app-header nav li {
-  margin-left: 20px;
+.footer-section li {
+  color: #bdc3c7;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
 }
 
-.app-header nav a {
-  color: white;
+.footer-section a {
+  color: #bdc3c7;
   text-decoration: none;
-  transition: color 0.3s;
+  transition: color 0.2s ease;
 }
 
-.app-header nav a:hover {
-  color: #4a90e2;
+.footer-section a:hover {
+  color: #ecf0f1;
 }
 
-.app-main {
-  flex: 1;
-}
-
-.app-footer {
-  background-color: #333;
-  color: white;
+.footer-bottom {
+  border-top: 1px solid #34495e;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
   text-align: center;
-  padding: 15px 0;
-  margin-top: 50px;
+}
+
+.footer-bottom p {
+  color: #95a5a6;
+  font-size: 0.85rem;
+  margin-bottom: 0.25rem;
+}
+
+.footer-version {
+  font-family: monospace;
+  background: rgba(52, 152, 219, 0.1);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+/* ページコンテナ関連 */
+.page-container {
+  min-height: calc(100vh - 200px);
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 2rem 0;
+}
+
+.page-content {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.page-content h1 {
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+  font-size: 2rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.page-content h2 {
+  color: #34495e;
+  margin-bottom: 1rem;
+  margin-top: 2rem;
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.page-content p {
+  color: #7f8c8d;
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+/* 準備中ページ */
+.coming-soon {
+  text-align: center;
+  padding: 3rem 1rem;
+  background: #f8f9ff;
+  border: 1px solid #e3e8ff;
+  border-radius: 8px;
+  margin-top: 2rem;
+}
+
+.coming-soon h2 {
+  color: #667eea;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+.coming-soon p {
+  color: #7f8c8d;
+  margin-bottom: 2rem;
+}
+
+.coming-soon button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.coming-soon button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+/* ヘルプページ */
+.help-sections {
+  margin-top: 2rem;
+}
+
+.help-sections section {
+  background: #f8fffe;
+  border: 1px solid #e0f4f3;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.help-sections h2 {
+  color: #00695c;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+}
+
+.help-sections ol,
+.help-sections ul {
+  color: #455a64;
+  padding-left: 1.5rem;
+}
+
+.help-sections li {
+  margin-bottom: 0.5rem;
+}
+
+.back-action {
+  text-align: center;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e9ecef;
+}
+
+.back-action button {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.back-action button:hover {
+  background: #5a6268;
+  transform: translateY(-1px);
+}
+
+/* 404ページ */
+.not-found {
+  text-align: center;
+  padding: 3rem 1rem;
+}
+
+.not-found-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.not-found h1 {
+  color: #e74c3c;
+  margin-bottom: 1rem;
+  font-size: 2rem;
+}
+
+.not-found p {
+  color: #7f8c8d;
+  margin-bottom: 2rem;
+  font-size: 1.1rem;
+}
+
+.not-found-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.not-found-actions button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 150px;
+}
+
+.not-found-actions button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.not-found-actions button:nth-child(2) {
+  background: #6c757d;
+}
+
+.not-found-actions button:nth-child(2):hover {
+  background: #5a6268;
+  box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+  .footer-content {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    text-align: center;
+  }
+  
+  .page-content {
+    margin: 0 1rem;
+    padding: 1.5rem;
+  }
+  
+  .page-content h1 {
+    font-size: 1.5rem;
+  }
+  
+  .not-found-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .not-found-actions button {
+    width: 100%;
+    max-width: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-container {
+    padding: 1rem 0;
+  }
+  
+  .page-content {
+    margin: 0 0.5rem;
+    padding: 1rem;
+  }
+  
+  .coming-soon {
+    padding: 2rem 1rem;
+  }
+  
+  .help-sections section {
+    padding: 1rem;
+  }
 }

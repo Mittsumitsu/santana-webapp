@@ -1,4 +1,4 @@
-// 🔧 修正版 AuthContext.js - ID生成ロジック改善
+// 📧 構文エラー修正版 AuthContext.js
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { 
   createUserWithEmailAndPassword,
@@ -8,30 +8,25 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   sendPasswordResetEmail,
-  updateProfile
+  updateProfile,
+  sendEmailVerification,
+  reload
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, collection, query, where, getDocs, limit } from 'firebase/firestore';
 import { auth, db } from '../firebase/config';
 
-// ==========================================
-// 🎯 修正版 実用性重視IDジェネレーター
-// ==========================================
-
+// 実用的IDジェネレーター
 const generatePracticalId = (length = 8) => {
-  // 読み間違い防止文字セット（0,1,I,O除外）
   const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
   let result = '';
-  
   for (let i = 0; i < length; i++) {
     result += chars.charAt(Math.floor(Math.random() * chars.length));
   }
-  
   return result;
 };
 
 const generateUserId = () => `U_${generatePracticalId(8)}`;
 
-// AuthContext作成
 const AuthContext = createContext();
 
 export const useAuth = () => {
@@ -49,6 +44,8 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [userCache, setUserCache] = useState(new Map());
+  const [emailVerificationSent, setEmailVerificationSent] = useState(false);
+  const [pendingVerification, setPendingVerification] = useState(null);
   const processingUsers = useRef(new Set());
 
   const getErrorMessage = (errorCode) => {
@@ -67,17 +64,131 @@ export const AuthProvider = ({ children }) => {
     return errorMessages[errorCode] || 'エラーが発生しました';
   };
 
-  // 🔧 修正版: 効率的ID重複チェック
+  // 📧 メール認証関連の新機能
+
+  /**
+   * メール認証送信
+   */
+  const sendVerificationEmail = async () => {
+    try {
+      // 認証待ちユーザーがいる場合
+      if (pendingVerification) {
+        await sendEmailVerification(pendingVerification.user);
+        setEmailVerificationSent(true);
+        console.log('📧 認証待ちユーザーに認証メール送信完了');
+        
+        return {
+          success: true,
+          message: '認証メールを送信しました。メールボックスを確認してください。'
+        };
+      }
+
+      if (!currentUser) {
+        throw new Error('ログインが必要です');
+      }
+
+      await sendEmailVerification(currentUser);
+      setEmailVerificationSent(true);
+      console.log('✅ 認証メール送信完了');
+      
+      return {
+        success: true,
+        message: '認証メールを送信しました。メールボックスを確認してください。'
+      };
+    } catch (error) {
+      console.error('❌ 認証メール送信失敗:', error);
+      const errorMessage = getErrorMessage(error.code) || '認証メールの送信に失敗しました';
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    }
+  };
+
+  /**
+   * メール認証状態の確認（認証待ち状態対応）
+   */
+  const checkEmailVerification = async () => {
+    try {
+      let userToCheck = currentUser;
+      
+      // 認証待ち状態の場合
+      if (pendingVerification && pendingVerification.user) {
+        userToCheck = pendingVerification.user;
+        await reload(pendingVerification.user);
+        console.log('🔄 認証待ちユーザーの状態を更新:', pendingVerification.user.emailVerified);
+      } else if (currentUser) {
+        await reload(currentUser);
+      }
+      
+      if (!userToCheck) return false;
+      
+      const isVerified = userToCheck.emailVerified;
+      
+      // 認証が完了した場合
+      if (isVerified && pendingVerification) {
+        console.log('✅ メール認証完了！自動ログイン開始');
+        
+        // Firestoreにユーザーデータを作成
+        const userWithCustomId = await createUserDocument(pendingVerification.user, {
+          displayName: pendingVerification.displayName
+        });
+        
+        // 正式にログイン状態にする
+        setCurrentUser(userWithCustomId);
+        setPendingVerification(null);
+        setEmailVerificationSent(false);
+        
+        return true;
+      }
+      
+      return isVerified;
+    } catch (error) {
+      console.error('❌ 認証状態確認エラー:', error);
+      return false;
+    }
+  };
+
+  /**
+   * アクセスレベルの取得
+   */
+  const getAccessLevel = () => {
+    if (pendingVerification) return 'pending';
+    if (!currentUser) return 'guest';
+    if (!currentUser.emailVerified && !currentUser?.userData?.emailVerified) return 'unverified';
+    return 'verified';
+  };
+
+  /**
+   * 予約可能かどうかの判定
+   */
+  const canMakeBooking = () => {
+    const accessLevel = getAccessLevel();
+    return accessLevel === 'verified';
+  };
+
+  /**
+   * 認証状態のリフレッシュ
+   */
+  const refreshAuthState = async () => {
+    if (currentUser) {
+      await reload(currentUser);
+      setCurrentUser({ ...currentUser });
+    } else if (pendingVerification) {
+      await reload(pendingVerification.user);
+      await checkEmailVerification();
+    }
+  };
+
+  // 既存の関数（認証待ち状態対応版に修正）
+
   const generateUniqueUserId = async () => {
     let attempts = 0;
-    const maxAttempts = 10; // 試行回数増加
+    const maxAttempts = 10;
     
     while (attempts < maxAttempts) {
       const candidateId = generateUserId();
       console.log(`🔍 ID候補生成: ${candidateId} (${attempts + 1}/${maxAttempts})`);
       
       try {
-        // 🔧 短いタイムアウト（1秒）で迅速チェック
         const checkPromise = getDoc(doc(db, 'users', candidateId));
         const timeoutPromise = new Promise((_, reject) => 
           setTimeout(() => reject(new Error('timeout')), 1000)
@@ -95,7 +206,6 @@ export const AuthProvider = ({ children }) => {
       } catch (error) {
         console.log(`⚠️ チェック失敗 (${candidateId}): ${error.message}`);
         
-        // 🔧 ネットワークエラーの場合、そのIDを使用
         if (error.message === 'timeout' || error.code === 'unavailable') {
           console.log(`🔧 ネットワークエラー時ID採用: ${candidateId}`);
           return candidateId;
@@ -105,20 +215,17 @@ export const AuthProvider = ({ children }) => {
       }
     }
     
-    // 🔧 最終フォールバック: 正しいフォーマット維持
     const fallbackId = generateUserId();
     console.log(`🔧 フォールバックID使用: ${fallbackId}`);
     return fallbackId;
   };
 
-  // 🔧 修正版 ユーザー情報をFirestoreに保存
   const createUserDocument = async (user, additionalData = {}) => {
     if (!user) return;
     
     const firebaseUid = user.uid;
-    console.log('🔒 重複防止開始:', user.email, firebaseUid);
+    console.log('🔒 ユーザー作成開始:', user.email, firebaseUid);
     
-    // 🔒 処理中フラグチェック
     if (processingUsers.current.has(firebaseUid)) {
       console.log('⚠️ ユーザー作成処理中 - 待機');
       for (let i = 0; i < 100; i++) {
@@ -127,7 +234,6 @@ export const AuthProvider = ({ children }) => {
       }
     }
     
-    // 🔒 キャッシュチェック
     if (userCache.has(firebaseUid)) {
       const cachedUser = userCache.get(firebaseUid);
       console.log('💾 キャッシュからユーザー取得:', cachedUser.userData?.id);
@@ -137,7 +243,7 @@ export const AuthProvider = ({ children }) => {
     processingUsers.current.add(firebaseUid);
     
     try {
-      // 🔍 既存ユーザー検索（Firebase UID）
+      // 既存ユーザー検索
       console.log('🔍 Firebase UIDで検索:', firebaseUid);
       
       const usersRef = collection(db, 'users');
@@ -160,12 +266,12 @@ export const AuthProvider = ({ children }) => {
       } catch (timeoutError) {
         console.error('⚠️ Firestore接続タイムアウト:', timeoutError.message);
         
-        // オフライン時の一時ユーザー
         const tempUserData = {
-          id: generateUserId(), // 🔧 正しいフォーマット使用
+          id: generateUserId(),
           displayName: user.displayName || 'オフラインユーザー',
           email: user.email,
           userType: 'guest',
+          emailVerified: user.emailVerified || false,
           isTemporary: true
         };
         
@@ -188,7 +294,8 @@ export const AuthProvider = ({ children }) => {
         try {
           await setDoc(existingDoc.ref, {
             lastLogin: new Date(),
-            updated_at: new Date()
+            updated_at: new Date(),
+            emailVerified: user.emailVerified || false
           }, { merge: true });
         } catch (updateError) {
           console.warn('⚠️ ログイン時間更新失敗（継続）:', updateError.message);
@@ -197,14 +304,14 @@ export const AuthProvider = ({ children }) => {
         const userWithCustomId = { 
           ...user, 
           customUserId: existingData.id, 
-          userData: existingData 
+          userData: { ...existingData, emailVerified: user.emailVerified || false }
         };
         
         userCache.set(firebaseUid, userWithCustomId);
         return userWithCustomId;
       }
       
-      // 🔍 メールアドレスでも検索
+      // メールアドレスでも検索
       console.log('🔍 メールアドレスで検索:', user.email);
       const emailQuery = query(
         usersRef,
@@ -237,7 +344,8 @@ export const AuthProvider = ({ children }) => {
           await setDoc(emailDoc.ref, {
             firebase_uid: firebaseUid,
             lastLogin: new Date(),
-            updated_at: new Date()
+            updated_at: new Date(),
+            emailVerified: user.emailVerified || false
           }, { merge: true });
         } catch (updateError) {
           console.warn('⚠️ Firebase UID更新失敗（継続）:', updateError.message);
@@ -246,17 +354,20 @@ export const AuthProvider = ({ children }) => {
         const userWithCustomId = { 
           ...user, 
           customUserId: emailData.id, 
-          userData: { ...emailData, firebase_uid: firebaseUid }
+          userData: { 
+            ...emailData, 
+            firebase_uid: firebaseUid, 
+            emailVerified: user.emailVerified || false 
+          }
         };
         
         userCache.set(firebaseUid, userWithCustomId);
         return userWithCustomId;
       }
       
-      // 🆕 完全新規ユーザー作成
+      // 完全新規ユーザー作成
       console.log('🆕 完全新規ユーザー作成開始');
       
-      // 🔧 修正版: 効率的ID生成
       const customUserId = await generateUniqueUserId();
       console.log('🆔 最終ID決定:', customUserId);
       
@@ -273,6 +384,7 @@ export const AuthProvider = ({ children }) => {
         lastLogin: createdAt,
         userType: 'guest',
         language: 'ja',
+        emailVerified: user.emailVerified || false,
         emailPreferences: {
           marketing: false,
           bookingConfirmation: true
@@ -302,12 +414,12 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.error('❌ ユーザードキュメント作成エラー:', error);
       
-      // 🔧 フォールバック: 正しいフォーマット維持
       const fallbackUserData = {
-        id: generateUserId(), // 🔧 正しいフォーマット
+        id: generateUserId(),
         displayName: user.displayName || 'エラーユーザー',
         email: user.email,
         userType: 'guest',
+        emailVerified: user.emailVerified || false,
         isTemporary: true,
         error: error.message
       };
@@ -367,7 +479,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // メール・パスワードで新規登録
+  // 📧 メール・パスワードで新規登録（認証完了まで一時ログアウト）
   const signup = async (email, password, displayName = '') => {
     try {
       setError(null);
@@ -381,10 +493,33 @@ export const AuthProvider = ({ children }) => {
         console.log('✅ プロフィール更新完了:', displayName);
       }
       
-      const userWithCustomId = await createUserDocument(result.user, { displayName });
-      console.log('✅ 新IDフォーマットFirestore保存完了:', userWithCustomId.customUserId);
+      // 📧 認証メール自動送信
+      try {
+        await sendEmailVerification(result.user);
+        setEmailVerificationSent(true);
+        console.log('📧 認証メール自動送信完了');
+      } catch (emailError) {
+        console.warn('⚠️ 認証メール送信失敗（継続）:', emailError.message);
+      }
       
-      return userWithCustomId;
+      // 🚨 重要：認証完了まで一時的にログアウト
+      console.log('🔄 認証完了まで一時ログアウト');
+      setPendingVerification({
+        user: result.user,
+        email: email,
+        displayName: displayName || ''
+      });
+      
+      // Firebaseからログアウト（認証完了まで）
+      await signOut(auth);
+      
+      console.log('📧 認証メール送信完了。メール認証後に再ログインしてください。');
+      
+      return {
+        success: true,
+        message: '認証メールを送信しました。メール内のリンクをクリックして認証を完了してください。',
+        pendingVerification: true
+      };
     } catch (error) {
       console.error('❌ 新規登録詳細エラー:', error);
       const errorMessage = getErrorMessage(error.code);
@@ -402,19 +537,35 @@ export const AuthProvider = ({ children }) => {
       const result = await signInWithEmailAndPassword(auth, email, password);
       console.log('✅ Firebase認証成功:', result.user.uid);
       
+      // メール認証チェック
+      if (!result.user.emailVerified) {
+        console.log('⚠️ メール未認証ユーザー');
+        
+        // 未認証ユーザーは一時ログアウト
+        setPendingVerification({
+          user: result.user,
+          email: email,
+          displayName: result.user.displayName || ''
+        });
+        
+        await signOut(auth);
+        
+        throw new Error('メールアドレスが認証されていません。認証メールのリンクをクリックしてから再度ログインしてください。');
+      }
+      
       const userWithCustomId = await createUserDocument(result.user);
       console.log('✅ 新IDフォーマットユーザー情報取得完了:', userWithCustomId.customUserId);
       
       return userWithCustomId;
     } catch (error) {
       console.error('❌ ログインエラー:', error);
-      const errorMessage = getErrorMessage(error.code);
+      const errorMessage = getErrorMessage(error.code) || error.message;
       setError(errorMessage);
       throw new Error(errorMessage);
     }
   };
 
-  // Googleでログイン
+  // Googleでログイン（認証済み扱い）
   const loginWithGoogle = async () => {
     try {
       setError(null);
@@ -422,6 +573,9 @@ export const AuthProvider = ({ children }) => {
       
       const result = await signInWithPopup(auth, googleProvider);
       console.log('✅ Google認証成功:', result.user.uid);
+      
+      // Googleログインは認証済み扱い
+      result.user.emailVerified = true;
       
       const userWithCustomId = await createUserDocument(result.user);
       console.log('✅ Google新IDフォーマットFirestore保存完了:', userWithCustomId.customUserId);
@@ -442,6 +596,8 @@ export const AuthProvider = ({ children }) => {
       console.log('🎯 ログアウト開始');
       
       setUserCache(new Map());
+      setEmailVerificationSent(false);
+      setPendingVerification(null);
       processingUsers.current.clear();
       
       await signOut(auth);
@@ -472,12 +628,28 @@ export const AuthProvider = ({ children }) => {
 
   // 認証状態の監視
   useEffect(() => {
-    console.log('🔒 認証状態監視開始（修正版）');
+    console.log('🔒 認証状態監視開始（認証待ち対応版）');
     
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      console.log('🔄 認証状態変更:', user ? `ユーザーあり (${user.uid})` : 'ユーザーなし');
+      console.log('🔄 認証状態変更:', user ? `ユーザーあり (${user.uid}, verified: ${user.emailVerified})` : 'ユーザーなし');
       
       if (user) {
+        // メール未認証の場合は認証待ち状態に
+        if (!user.emailVerified) {
+          console.log('📧 メール未認証ユーザー - 認証待ち状態に設定');
+          setPendingVerification({
+            user: user,
+            email: user.email,
+            displayName: user.displayName || ''
+          });
+          
+          // 一時ログアウト
+          await signOut(auth);
+          setCurrentUser(null);
+          setLoading(false);
+          return;
+        }
+        
         try {
           if (processingUsers.current.has(user.uid)) {
             console.log('⚠️ ユーザー処理中 - onAuthStateChangedをスキップ');
@@ -487,27 +659,16 @@ export const AuthProvider = ({ children }) => {
           if (userCache.has(user.uid)) {
             const cachedUser = userCache.get(user.uid);
             console.log('💾 キャッシュからユーザー設定:', cachedUser.userData?.id);
+            cachedUser.userData.emailVerified = user.emailVerified;
             setCurrentUser(cachedUser);
+            setPendingVerification(null);
             setLoading(false);
             return;
           }
           
-          const customUserData = await findUserByFirebaseUid(user.uid);
-          if (customUserData) {
-            console.log('✅ 新IDフォーマットユーザー情報取得:', customUserData.id);
-            const userWithCustomId = { 
-              ...user, 
-              customUserId: customUserData.id, 
-              userData: customUserData 
-            };
-            
-            userCache.set(user.uid, userWithCustomId);
-            setCurrentUser(userWithCustomId);
-          } else {
-            console.log('🆕 新規ユーザー - ドキュメント作成');
-            const userWithCustomId = await createUserDocument(user);
-            setCurrentUser(userWithCustomId);
-          }
+          const userWithCustomId = await createUserDocument(user);
+          setCurrentUser(userWithCustomId);
+          setPendingVerification(null);
         } catch (error) {
           console.error('❌ 認証状態変更エラー:', error);
           setCurrentUser(user);
@@ -515,6 +676,7 @@ export const AuthProvider = ({ children }) => {
       } else {
         setCurrentUser(null);
         setUserCache(new Map());
+        setEmailVerificationSent(false);
         processingUsers.current.clear();
       }
       setLoading(false);
@@ -536,6 +698,15 @@ export const AuthProvider = ({ children }) => {
     loading,
     error,
     clearError,
+    
+    // 📧 メール認証関連の新機能
+    sendVerificationEmail,
+    checkEmailVerification,
+    refreshAuthState,
+    getAccessLevel,
+    canMakeBooking,
+    emailVerificationSent,
+    pendingVerification,
     
     getUserId: () => {
       const customId = currentUser?.customUserId || currentUser?.userData?.id;
