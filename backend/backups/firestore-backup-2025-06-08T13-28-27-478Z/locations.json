@@ -1,0 +1,80 @@
+[
+  {
+    "id": "delhi",
+    "data": {
+      "id": "delhi",
+      "name": "サンタナデリー",
+      "address": "4690/2, Shora Kothi Paharganj, New Delhi, Delhi, India 110055",
+      "email": "santana.delhi@gmail.com",
+      "check_in_time": "10:00",
+      "check_out_time": "11:00",
+      "is_active": true,
+      "amenities": [
+        "Wifi",
+        "朝食",
+        "サンタナ食堂",
+        "洗濯機",
+        "屋上"
+      ],
+      "map_coodinates": {
+        "lat": 28.6370335,
+        "lng": 77.1942594
+      },
+      "created_at": "2025-04-30T05:27:26.664Z",
+      "updated_at": "2025-04-30T05:28:08.080Z"
+    }
+  },
+  {
+    "id": "puri",
+    "data": {
+      "id": "puri",
+      "name": "サンタナロッジ",
+      "address": "Shrivihar, Chhak, Puri, Orissa, INDIA",
+      "phone": "9937706703",
+      "email": "india.santana.info@gmail.com",
+      "check_in_time": "10:00",
+      "check_out_time": "11:00",
+      "is_active": true,
+      "amenities": [
+        "Wifi",
+        "サンタナ食堂",
+        "洗濯機",
+        "共同トイレ",
+        "共同シャワー"
+      ],
+      "map_coodinates": {
+        "lat": 19.8066463,
+        "lng": 85.8529757
+      },
+      "created_at": "2025-04-30T05:27:41.596Z",
+      "updated_at": "2025-04-30T05:28:21.396Z"
+    }
+  },
+  {
+    "id": "varanasi",
+    "data": {
+      "id": "varanasi",
+      "name": "サンタナバラナシ",
+      "address": "D-33/53, Khalishpura, Dashashwamedh, Varanasi, Uttar Pradesh, India 221001",
+      "email": "varanasisantana@gmail.com",
+      "check_in_time": "10:00",
+      "check_out_time": "11:00",
+      "is_active": true,
+      "amenities": [
+        "Wifi",
+        "共同シャワー",
+        "共同トイレ",
+        "屋上",
+        "朝食",
+        "サンタナ食堂",
+        "洗濯機"
+      ],
+      "map_coodinates": {
+        "lat": 25.311085,
+        "lng": "83.0050424"
+      },
+      "created_at": "2025-04-30T05:27:52.629Z",
+      "updated_at": "2025-04-30T05:28:31.213Z"
+    }
+  }
+]

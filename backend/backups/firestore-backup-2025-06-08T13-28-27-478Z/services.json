@@ -1,0 +1,176 @@
+[
+  {
+    "id": "airport_dropoff",
+    "data": {
+      "id": "airport_dropoff",
+      "category_id": "transportation",
+      "name": "空港ドロップ",
+      "name_en": "Airport Drop-off",
+      "description": "ホテルから空港までの送迎サービス",
+      "is_active": true,
+      "prepayment_required": true,
+      "required_payment_methods": [
+        "bank_transfer"
+      ],
+      "required_fields": [
+        "flight_number",
+        "departure_time",
+        "departure_date",
+        "gender"
+      ],
+      "display_order": 2,
+      "location_prices": {
+        "delhi": 1000,
+        "varanasi": 1200,
+        "puri": 800
+      },
+      "created_at": "2025-04-30T00:00:00.000Z",
+      "updated_at": "2025-04-30T00:00:00.000Z"
+    }
+  },
+  {
+    "id": "airport_pickup",
+    "data": {
+      "id": "airport_pickup",
+      "category_id": "transportation",
+      "name": "空港ピックアップ",
+      "name_en": "Airport Pickup",
+      "description": "空港からホテルまでの送迎サービス",
+      "is_active": true,
+      "prepayment_required": true,
+      "required_payment_methods": [
+        "bank_transfer"
+      ],
+      "required_fields": [
+        "flight_number",
+        "arrival_time",
+        "arrival_date",
+        "gender"
+      ],
+      "display_order": 1,
+      "location_prices": {
+        "delhi": 1000,
+        "varanasi": 1200,
+        "puri": 800
+      },
+      "created_at": "2025-04-30T00:00:00.000Z",
+      "updated_at": "2025-04-30T00:00:00.000Z"
+    }
+  },
+  {
+    "id": "meal_breakfast",
+    "data": {
+      "id": "meal_breakfast",
+      "category_id": "meal",
+      "name": "朝食",
+      "name_en": "Breakfast",
+      "description": "トースト、果物、コーヒーor紅茶",
+      "is_active": true,
+      "prepayment_required": false,
+      "display_order": 1,
+      "location_prices": {
+        "delhi": 300,
+        "varanasi": 300,
+        "puri": 300
+      },
+      "created_at": "2025-04-30T00:00:00.000Z",
+      "updated_at": "2025-04-30T00:00:00.000Z"
+    }
+  },
+  {
+    "id": "train_station_dropoff",
+    "data": {
+      "id": "train_station_dropoff",
+      "category_id": "transportation",
+      "name": "駅ドロップ",
+      "name_en": "Train Station Drop-off",
+      "description": "ホテルから駅までの送迎サービス",
+      "is_active": true,
+      "prepayment_required": true,
+      "required_payment_methods": [
+        "bank_transfer"
+      ],
+      "required_fields": [
+        "train_number",
+        "departure_time",
+        "departure_date",
+        "gender"
+      ],
+      "display_order": 4,
+      "location_prices": {
+        "varanasi": 800
+      },
+      "created_at": "2025-04-30T00:00:00.000Z",
+      "updated_at": "2025-04-30T00:00:00.000Z"
+    }
+  },
+  {
+    "id": "train_station_pickup",
+    "data": {
+      "id": "train_station_pickup",
+      "category_id": "transportation",
+      "name": "駅ピックアップ",
+      "name_en": "Train Station Pickup",
+      "description": "駅からホテルまでの送迎サービス",
+      "is_active": true,
+      "prepayment_required": true,
+      "required_payment_methods": [
+        "bank_transfer"
+      ],
+      "required_fields": [
+        "train_number",
+        "arrival_time",
+        "arrival_date",
+        "gender",
+        "coach_number",
+        "seat_number",
+        "pnr"
+      ],
+      "display_order": 3,
+      "location_prices": {
+        "varanasi": 800
+      },
+      "created_at": "2025-04-30T00:00:00.000Z",
+      "updated_at": "2025-04-30T00:00:00.000Z"
+    }
+  },
+  {
+    "id": "water_bottle",
+    "data": {
+      "id": "water_bottle",
+      "category_id": "shop",
+      "name": "ミネラルウォーター",
+      "name_en": "Mineral Water",
+      "description": "500mlペットボトル",
+      "is_active": true,
+      "prepayment_required": false,
+      "display_order": 1,
+      "location_prices": {
+        "delhi": 50,
+        "varanasi": 40,
+        "puri": 30
+      },
+      "created_at": "2025-04-30T00:00:00.000Z",
+      "updated_at": "2025-04-30T00:00:00.000Z"
+    }
+  },
+  {
+    "id": "yoga_class",
+    "data": {
+      "id": "yoga_class",
+      "category_id": "activity",
+      "name": "ヨガレッスン",
+      "name_en": "Yoga Class",
+      "description": "インド式ヨガの基本レッスン（1時間）",
+      "is_active": true,
+      "prepayment_required": false,
+      "display_order": 1,
+      "location_prices": {
+        "varanasi": 800,
+        "puri": 800
+      },
+      "created_at": "2025-04-30T00:00:00.000Z",
+      "updated_at": "2025-04-30T00:00:00.000Z"
+    }
+  }
+]

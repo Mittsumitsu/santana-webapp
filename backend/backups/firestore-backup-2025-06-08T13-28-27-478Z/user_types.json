@@ -1,0 +1,97 @@
+[
+  {
+    "id": "admin",
+    "data": {
+      "id": "admin",
+      "name": "管理者",
+      "name_en": "Administrator",
+      "description": "すべての機能にアクセス可能",
+      "description_en": "Full access to all features",
+      "permissions": [
+        "all"
+      ],
+      "default_language": "ja",
+      "available_languages": [
+        "ja",
+        "en"
+      ]
+    }
+  },
+  {
+    "id": "guest",
+    "data": {
+      "id": "guest",
+      "name": "お客さん",
+      "name_en": "Guest",
+      "description": "自分の予約の閲覧・管理のみ可能",
+      "description_en": "Can only view and manage their own bookings",
+      "permissions": [
+        "own_bookings_manage"
+      ],
+      "default_language": "ja",
+      "available_languages": [
+        "ja"
+      ]
+    }
+  },
+  {
+    "id": "local_staff",
+    "data": {
+      "id": "local_staff",
+      "name": "現地スタッフ",
+      "name_en": "Local Staff",
+      "description": "チェックイン/チェックアウト処理や予約の閲覧のみ可能",
+      "description_en": "Limited access to check-in/out and bookings viewing",
+      "permissions": [
+        "check_in",
+        "check_out",
+        "bookings_view"
+      ],
+      "default_language": "en",
+      "available_languages": [
+        "en"
+      ]
+    }
+  },
+  {
+    "id": "staff",
+    "data": {
+      "id": "staff",
+      "name": "主要スタッフ",
+      "name_en": "Main Staff",
+      "description": "予約管理や部屋管理などの機能にアクセス可能",
+      "description_en": "Access to booking management and room management",
+      "permissions": [
+        "bookings_manage",
+        "rooms_manage",
+        "guests_view",
+        "payments_manage"
+      ],
+      "default_language": "ja",
+      "available_languages": [
+        "ja",
+        "en"
+      ]
+    }
+  },
+  {
+    "id": "temp_staff",
+    "data": {
+      "id": "temp_staff",
+      "name": "短期スタッフ",
+      "name_en": "Temporary Staff",
+      "description": "チェックイン/チェックアウト処理や予約の閲覧のみ可能",
+      "description_en": "Limited access to check-in/out and bookings viewing",
+      "permissions": [
+        "check_in",
+        "check_out",
+        "bookings_view"
+      ],
+      "default_language": "ja",
+      "available_languages": [
+        "ja",
+        "en"
+      ]
+    }
+  }
+]

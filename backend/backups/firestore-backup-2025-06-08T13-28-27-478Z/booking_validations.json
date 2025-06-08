@@ -1,0 +1,46 @@
+[
+  {
+    "id": "4gv2pWUbcOK8QPOEaTjp",
+    "data": {
+      "id": "4gv2pWUbcOK8QPOEaTjp",
+      "booking_id": "6cW1AB5Q5ljkKkYN9WRZ",
+      "validation_type": "gender_restriction",
+      "status": "passed",
+      "details": "正常に検証されました",
+      "created_at": "2025-06-01T13:15:58.468Z"
+    }
+  },
+  {
+    "id": "5pXrJQFzyBmABMtDQRXJ",
+    "data": {
+      "id": "5pXrJQFzyBmABMtDQRXJ",
+      "booking_id": "QHgsKXd3lYDIIJTYU06i",
+      "validation_type": "gender_restriction",
+      "status": "passed",
+      "details": "男性専用ドミトリーの予約は正常に検証されました",
+      "created_at": "2025-06-01T13:05:13.906Z"
+    }
+  },
+  {
+    "id": "TlZMKZQ6bwQTi5oqeitH",
+    "data": {
+      "id": "TlZMKZQ6bwQTi5oqeitH",
+      "booking_id": "KygJ7twManzwAuElO9Xq",
+      "validation_type": "gender_restriction",
+      "status": "passed",
+      "details": "正常に検証されました",
+      "created_at": "2025-06-03T07:02:20.514Z"
+    }
+  },
+  {
+    "id": "val12345",
+    "data": {
+      "id": "val12345",
+      "booking_id": "rsv_child1",
+      "validation_type": "gender_restriction",
+      "status": "passed",
+      "details": "女性専用ドミトリーの予約は女性ゲストのみで構成されています",
+      "created_at": "2025-05-07T10:29:55.000Z"
+    }
+  }
+]

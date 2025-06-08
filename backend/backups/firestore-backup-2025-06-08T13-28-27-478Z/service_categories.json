@@ -1,0 +1,54 @@
+[
+  {
+    "id": "activity",
+    "data": {
+      "id": "activity",
+      "name": "アクティビティ",
+      "name_en": "Activity",
+      "icon": "hiking",
+      "display_order": 3,
+      "is_active": true,
+      "created_at": "2025-04-30T00:00:00.000Z",
+      "updated_at": "2025-04-30T00:00:00.000Z"
+    }
+  },
+  {
+    "id": "meal",
+    "data": {
+      "id": "meal",
+      "name": "食事注文",
+      "name_en": "Food Order",
+      "icon": "utensils",
+      "display_order": 2,
+      "is_active": true,
+      "created_at": "2025-04-30T00:00:00.000Z",
+      "updated_at": "2025-04-30T00:00:00.000Z"
+    }
+  },
+  {
+    "id": "shop",
+    "data": {
+      "id": "shop",
+      "name": "販売",
+      "name_en": "Shop",
+      "icon": "shopping-bag",
+      "display_order": 1,
+      "is_active": true,
+      "created_at": "2025-04-30T00:00:00.000Z",
+      "updated_at": "2025-04-30T00:00:00.000Z"
+    }
+  },
+  {
+    "id": "transportation",
+    "data": {
+      "id": "transportation",
+      "name": "送迎",
+      "name_en": "Transfer",
+      "icon": "car",
+      "display_order": 4,
+      "is_active": true,
+      "created_at": "2025-04-30T00:00:00.000Z",
+      "updated_at": "2025-04-30T00:00:00.000Z"
+    }
+  }
+]

@@ -1,0 +1,19 @@
+[
+  {
+    "id": "cust_srv1a2b3c4d",
+    "data": {
+      "id": "cust_srv1a2b3c4d",
+      "parent_booking_id": "parent_rsva7f8d9e2",
+      "booking_id": "rsv_child1",
+      "category_id": "meal",
+      "name": "特別リクエスト（カレー）",
+      "name_en": "Special Request (Curry)",
+      "description": "スパイスを抑えた日本人向けカレー",
+      "price": 400,
+      "currency": "INR",
+      "created_by": "staff8g9h0i1j2k",
+      "created_at": "2025-05-11T14:00:00.000Z",
+      "updated_at": "2025-05-11T14:00:00.000Z"
+    }
+  }
+]

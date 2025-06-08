@@ -1,0 +1,37 @@
+[
+  {
+    "id": "bank_transfer",
+    "data": {
+      "id": "bank_transfer",
+      "name": "銀行振込",
+      "name_en": "Bank Transfer",
+      "description": "三菱UFJ銀行への事前振込",
+      "description_en": "Advance payment via MUFJ Bank",
+      "bank_info": {
+        "bank_name": "三菱UFJ銀行",
+        "branch_name": "東京支店",
+        "account_type": "普通",
+        "account_number": "1234567",
+        "account_name": "サンタナグループ"
+      },
+      "is_active": true,
+      "restrictions": [],
+      "created_at": "2025-04-30T00:00:00.000Z",
+      "updated_at": "2025-04-30T00:00:00.000Z"
+    }
+  },
+  {
+    "id": "cash_onsite",
+    "data": {
+      "id": "cash_onsite",
+      "name": "現地払い",
+      "name_en": "Cash on Arrival",
+      "description": "チェックアウト時に現金でお支払いいただけます",
+      "description_en": "Payment in cash upon check-out",
+      "is_active": true,
+      "restrictions": [],
+      "created_at": "2025-04-30T00:00:00.000Z",
+      "updated_at": "2025-04-30T00:00:00.000Z"
+    }
+  }
+]

@@ -1,0 +1,24 @@
+[
+  {
+    "id": "U_B9Z3BRJN",
+    "data": {
+      "userType": "guest",
+      "createdAt": "2025-06-05T08:30:11.541Z",
+      "id": "U_B9Z3BRJN",
+      "displayName": "テスト太郎",
+      "email": "oo00mixan00oo@icloud.com",
+      "emailPreferences": {
+        "marketing": false,
+        "bookingConfirmation": true
+      },
+      "created_at": "2025-06-05T08:30:11.541Z",
+      "language": "ja",
+      "emailVerified": true,
+      "recovery_version": "1.0_USERS_RESTORATION",
+      "recovery_created": true,
+      "firebase_uid": "NK6HwBw49fcQdZaZiOFyovq8HwW2",
+      "lastLogin": "2025-06-08T11:39:36.225Z",
+      "updated_at": "2025-06-08T11:39:36.225Z"
+    }
+  }
+]

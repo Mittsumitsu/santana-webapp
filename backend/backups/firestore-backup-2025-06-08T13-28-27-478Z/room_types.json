@@ -1,0 +1,87 @@
+[
+  {
+    "id": "deluxe",
+    "data": {
+      "id": "deluxe",
+      "name": "デラックスルーム",
+      "description": "1〜2人用のデラックス個室",
+      "base_price": 2300,
+      "standard_amenities": [
+        "専用シャワー",
+        "専用トイレ",
+        "冷蔵庫",
+        "エアコン"
+      ],
+      "created_at": "2025-04-30T05:59:17.511Z",
+      "updated_at": "2025-04-30T05:59:33.362Z"
+    }
+  },
+  {
+    "id": "deluxe_VIP",
+    "data": {
+      "id": "deluxe_VIP",
+      "name": "VIPルーム",
+      "description": "1〜4名用の広々としたデラックス個室",
+      "base_price": 3000,
+      "standard_amenities": [
+        "バスタブ付きシャワー",
+        "専用トイレ",
+        "冷蔵庫",
+        "エアコン"
+      ],
+      "created_at": "2025-04-30T06:05:45.926Z",
+      "updated_at": "2025-04-30T06:06:04.577Z"
+    }
+  },
+  {
+    "id": "dormitory",
+    "data": {
+      "id": "dormitory",
+      "name": "ドミトリー",
+      "base_price": 700,
+      "created_at": "2025-04-30T05:12:30.853Z",
+      "updated_at": "2025-04-30T05:12:49.505Z",
+      "standard_amenities": [
+        "ドミトリー用シャワー",
+        "ドミトリー用トイレ",
+        "エアコン",
+        "専用コンセント"
+      ],
+      "description": "相部屋タイプの部屋"
+    }
+  },
+  {
+    "id": "single",
+    "data": {
+      "id": "single",
+      "name": "シングルルーム",
+      "base_price": 1400,
+      "standard_amenities": [
+        "専用シャワー",
+        "専用トイレ",
+        "エアコン",
+        "冷蔵庫"
+      ],
+      "created_at": "2025-04-30T05:35:01.680Z",
+      "updated_at": "2025-04-30T05:35:21.013Z",
+      "description": "1人用の個室"
+    }
+  },
+  {
+    "id": "twin",
+    "data": {
+      "id": "twin",
+      "name": "ツインルーム",
+      "base_price": 1700,
+      "standard_amenities": [
+        "専用シャワー",
+        "専用トイレ",
+        "冷蔵庫",
+        "エアコン"
+      ],
+      "created_at": "2025-04-30T05:40:50.526Z",
+      "updated_at": "2025-04-30T05:41:05.253Z",
+      "description": "1〜2人用の個室"
+    }
+  }
+]

@@ -192,7 +192,7 @@ exports.getBookingById = async (req, res) => {
   }
 };
 
-// 🎯 新IDシステム対応: 新しい予約を作成
+// 🎯 新IDシステム対応: 新しい予約を作成（部屋タイプ保存対応）
 exports.createBooking = async (req, res) => {
   try {
     const { user_id, check_in_date, check_out_date, primary_contact, rooms } = req.body;
@@ -217,6 +217,55 @@ exports.createBooking = async (req, res) => {
       return res.status(400).json({ error: '必要な情報が不足しています' });
     }
 
+    // 🎯 部屋情報を取得して部屋タイプを保存
+    const enrichedRooms = [];
+    
+    for (const room of rooms) {
+      try {
+        // 部屋詳細を取得
+        const roomDoc = await db.collection('rooms').doc(room.room_id).get();
+        
+        if (!roomDoc.exists) {
+          return res.status(400).json({ 
+            error: `部屋 ${room.room_id} が見つかりません` 
+          });
+        }
+        
+        const roomData = roomDoc.data();
+        
+        // 部屋情報を予約データに含める
+        const enrichedRoom = {
+          room_id: room.room_id,
+          room_type_id: roomData.room_type_id, // 🎯 予約時点の部屋タイプを保存
+          room_name: roomData.name,
+          check_in_time: room.check_in_time || '14:00',
+          number_of_guests: room.guests.length,
+          primary_guest: room.guests[0],
+          additional_guests: room.guests.slice(1),
+          room_amount: room.price,
+          // 予約時点の部屋情報スナップショット
+          room_snapshot: {
+            room_type_id: roomData.room_type_id,
+            room_type_name: getRoomTypeName(roomData.room_type_id),
+            capacity: roomData.capacity,
+            current_price: roomData.current_price,
+            location_id: roomData.location_id,
+            room_number: roomData.room_number
+          }
+        };
+        
+        enrichedRooms.push(enrichedRoom);
+        
+        console.log(`📋 部屋情報取得: ${room.room_id} (${roomData.room_type_id})`);
+        
+      } catch (roomError) {
+        console.error(`❌ 部屋情報取得エラー (${room.room_id}):`, roomError);
+        return res.status(500).json({ 
+          error: `部屋情報の取得に失敗しました: ${room.room_id}` 
+        });
+      }
+    }
+
     // 🎯 新IDシステムで統合予約を作成
     const newBookingId = generateNewBookingId();
     
@@ -230,15 +279,8 @@ exports.createBooking = async (req, res) => {
       primary_contact,
       total_amount: rooms.reduce((total, room) => total + room.price, 0),
       
-      // 統合予約の部屋情報
-      rooms: rooms.map(room => ({
-        room_id: room.room_id,
-        check_in_time: room.check_in_time || '14:00',
-        number_of_guests: room.guests.length,
-        primary_guest: room.guests[0],
-        additional_guests: room.guests.slice(1),
-        room_amount: room.price
-      })),
+      // 🎯 部屋タイプ情報を含む統合予約の部屋情報
+      rooms: enrichedRooms,
       
       // メタデータ
       created_at: admin.firestore.FieldValue.serverTimestamp(),
@@ -252,12 +294,17 @@ exports.createBooking = async (req, res) => {
     await db.collection('bookings').doc(newBookingId).set(unifiedBookingData);
 
     console.log('✅ 新IDシステム予約作成成功:', newBookingId);
+    console.log('🏨 保存された部屋タイプ:', enrichedRooms.map(r => `${r.room_id}:${r.room_type_id}`));
     
     res.status(201).json({
       message: '予約が作成されました',
       booking_id: newBookingId,
       total_amount: unifiedBookingData.total_amount,
       total_guests: unifiedBookingData.total_guests,
+      rooms_info: enrichedRooms.map(r => ({
+        room_id: r.room_id,
+        room_type: r.room_snapshot.room_type_name
+      })),
       system_version: '2.0_NEW_ID_SYSTEM'
     });
     
@@ -486,6 +533,18 @@ function calculateCorrectAmount(bookingData) {
   }
   
   return bookingData.total_amount || 0;
+}
+
+// 🎯 部屋タイプIDから日本語名を取得
+function getRoomTypeName(roomTypeId) {
+  const typeMap = {
+    'single': 'シングルルーム',
+    'twin': 'ツインルーム', 
+    'deluxe': 'デラックスルーム',
+    'dormitory': 'ドミトリー',
+    'deluxe_VIP': 'VIPルーム'
+  };
+  return typeMap[roomTypeId] || roomTypeId;
 }
 
 // 🎯 新IDシステム用のID生成関数

@@ -1,0 +1,59 @@
+[
+  {
+    "id": "B_2T7G5SXKL5JQ",
+    "data": {
+      "id": "B_2T7G5SXKL5JQ",
+      "user_id": "U_B9Z3BRJN",
+      "check_in_date": "2025-06-09",
+      "check_out_date": "2025-06-11",
+      "status": "confirmed",
+      "total_guests": 4,
+      "primary_contact": {
+        "name_kanji": "テスト 太郎",
+        "name_romaji": "TEST TARO",
+        "email": "oo00mixan00oo@icloud.com",
+        "gender": "male"
+      },
+      "total_amount": 3400,
+      "rooms": [
+        {
+          "room_id": "delhi-202",
+          "check_in_time": "14:00",
+          "number_of_guests": 2,
+          "primary_guest": {
+            "name_romaji": "TEST TARO",
+            "gender": "male"
+          },
+          "additional_guests": [
+            {
+              "name_romaji": "TEST JIRO",
+              "gender": "male"
+            }
+          ],
+          "room_amount": 1700
+        },
+        {
+          "room_id": "delhi-301",
+          "check_in_time": "14:00",
+          "number_of_guests": 2,
+          "primary_guest": {
+            "name_romaji": "TEST HANAKO",
+            "gender": "female"
+          },
+          "additional_guests": [
+            {
+              "name_romaji": "TEST HONIKO",
+              "gender": "female"
+            }
+          ],
+          "room_amount": 1700
+        }
+      ],
+      "created_by": "U_B9Z3BRJN",
+      "system_version": "2.0_NEW_ID_SYSTEM",
+      "booking_type": "unified_booking",
+      "updated_at": "2025-06-08T11:15:50.826Z",
+      "created_at": "2025-06-08T11:15:50.826Z"
+    }
+  }
+]

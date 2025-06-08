@@ -1,0 +1,670 @@
+[
+  {
+    "id": "R_2BWH77",
+    "data": {
+      "id": "R_2BWH77",
+      "location_id": "delhi",
+      "room_number": "303",
+      "room_type_id": "twin",
+      "name": "ツインルーム",
+      "capacity": 2,
+      "current_price": 1700,
+      "description": "1〜2人用の個室",
+      "is_active": true,
+      "gender_restriction": "none",
+      "floor": 3,
+      "additional_amenities": [
+        "none"
+      ],
+      "created_at": "2025-05-07T00:00:00.000Z",
+      "updated_at": "2025-05-07T00:00:00.000Z",
+      "migration_version": "2.0_TARO_UNIFIED_UPPERCASE",
+      "migrated_at": "2025-06-04T11:24:19.482Z"
+    }
+  },
+  {
+    "id": "R_4MFMX2",
+    "data": {
+      "id": "R_4MFMX2",
+      "location_id": "varanasi",
+      "room_number": "301",
+      "room_type_id": "deluxe",
+      "name": "Bデラックスルーム",
+      "capacity": 2,
+      "current_price": 2300,
+      "description": "バスタブ付きのデラックス個室。湯船に浸かりたい方におすすめ。",
+      "is_active": true,
+      "gender_restriction": "none",
+      "floor": 3,
+      "additional_amenities": [
+        "バスタブ"
+      ],
+      "created_at": "2025-05-07T00:00:00.000Z",
+      "updated_at": "2025-05-07T00:00:00.000Z",
+      "migration_version": "2.0_TARO_UNIFIED_UPPERCASE",
+      "migrated_at": "2025-06-04T11:24:19.482Z"
+    }
+  },
+  {
+    "id": "R_4RQQWK",
+    "data": {
+      "id": "R_4RQQWK",
+      "location_id": "puri",
+      "room_number": "307",
+      "room_type_id": "single",
+      "name": "シングルルーム",
+      "capacity": 1,
+      "current_price": 1400,
+      "description": "1人用の個室",
+      "is_active": true,
+      "gender_restriction": "none",
+      "floor": 3,
+      "additional_amenities": [
+        "none"
+      ],
+      "created_at": "2025-05-07T00:00:00.000Z",
+      "updated_at": "2025-05-07T00:00:00.000Z",
+      "migration_version": "2.0_TARO_UNIFIED_UPPERCASE",
+      "migrated_at": "2025-06-04T11:24:19.482Z"
+    }
+  },
+  {
+    "id": "R_4T9MTG",
+    "data": {
+      "id": "R_4T9MTG",
+      "location_id": "puri",
+      "room_number": "203",
+      "room_type_id": "deluxe",
+      "name": "Aデラックスルーム",
+      "capacity": 2,
+      "current_price": 2300,
+      "description": "1〜2人用のデラックス個室",
+      "is_active": true,
+      "gender_restriction": "none",
+      "floor": 2,
+      "additional_amenities": [
+        "none"
+      ],
+      "created_at": "2025-05-07T00:00:00.000Z",
+      "updated_at": "2025-05-07T00:00:00.000Z",
+      "migration_version": "2.0_TARO_UNIFIED_UPPERCASE",
+      "migrated_at": "2025-06-04T11:24:19.482Z"
+    }
+  },
+  {
+    "id": "R_4VQG8M",
+    "data": {
+      "id": "R_4VQG8M",
+      "location_id": "varanasi",
+      "room_number": "101",
+      "room_type_id": "twin",
+      "name": "ツインルーム",
+      "capacity": 2,
+      "current_price": 1700,
+      "description": "1〜2人用の個室",
+      "is_active": true,
+      "gender_restriction": "none",
+      "floor": 1,
+      "additional_amenities": [
+        "none"
+      ],
+      "created_at": "2025-05-07T00:00:00.000Z",
+      "updated_at": "2025-05-07T00:00:00.000Z",
+      "migration_version": "2.0_TARO_UNIFIED_UPPERCASE",
+      "migrated_at": "2025-06-04T11:24:19.482Z"
+    }
+  },
+  {
+    "id": "R_5BT9MZ",
+    "data": {
+      "id": "R_5BT9MZ",
+      "location_id": "puri",
+      "room_number": "304",
+      "room_type_id": "deluxe",
+      "name": "Aデラックスルーム",
+      "capacity": 2,
+      "current_price": 2300,
+      "description": "1〜2人用のデラックス個室",
+      "is_active": true,
+      "gender_restriction": "none",
+      "floor": 3,
+      "additional_amenities": [
+        "none"
+      ],
+      "created_at": "2025-05-07T00:00:00.000Z",
+      "updated_at": "2025-05-07T00:00:00.000Z",
+      "migration_version": "2.0_TARO_UNIFIED_UPPERCASE",
+      "migrated_at": "2025-06-04T11:24:19.482Z"
+    }
+  },
+  {
+    "id": "R_62SM8Y",
+    "data": {
+      "id": "R_62SM8Y",
+      "location_id": "delhi",
+      "room_number": "101",
+      "room_type_id": "single",
+      "name": "シングルルーム",
+      "capacity": 1,
+      "current_price": 1400,
+      "description": "1人用の個室",
+      "is_active": true,
+      "gender_restriction": "none",
+      "floor": 1,
+      "additional_amenities": [
+        "none"
+      ],
+      "created_at": "2025-05-02T05:27:07.868Z",
+      "updated_at": "2025-05-02T05:27:24.867Z",
+      "migration_version": "2.0_TARO_UNIFIED_UPPERCASE",
+      "migrated_at": "2025-06-04T11:24:19.482Z"
+    }
+  },
+  {
+    "id": "R_6DQZP8",
+    "data": {
+      "id": "R_6DQZP8",
+      "location_id": "varanasi",
+      "room_number": "305",
+      "room_type_id": "deluxe",
+      "name": "Aデラックスルーム",
+      "capacity": 2,
+      "current_price": 2300,
+      "description": "バラナシで1番広い部屋。デスクワークにも適した作業テーブル付き。",
+      "is_active": true,
+      "gender_restriction": "none",
+      "floor": 3,
+      "additional_amenities": [
+        "作業テーブル",
+        "広いスペース"
+      ],
+      "created_at": "2025-05-07T00:00:00.000Z",
+      "updated_at": "2025-05-07T00:00:00.000Z",
+      "migration_version": "2.0_TARO_UNIFIED_UPPERCASE",
+      "migrated_at": "2025-06-04T11:24:19.482Z"
+    }
+  },
+  {
+    "id": "R_AAV4CG",
+    "data": {
+      "id": "R_AAV4CG",
+      "location_id": "delhi",
+      "room_number": "203",
+      "room_type_id": "single",
+      "name": "シングルルーム",
+      "capacity": 1,
+      "current_price": 1400,
+      "description": "1人用の個室",
+      "is_active": true,
+      "gender_restriction": "none",
+      "floor": 2,
+      "additional_amenities": [
+        "none"
+      ],
+      "created_at": "2025-05-07T00:00:00.000Z",
+      "updated_at": "2025-05-07T00:00:00.000Z",
+      "migration_version": "2.0_TARO_UNIFIED_UPPERCASE",
+      "migrated_at": "2025-06-04T11:24:19.482Z"
+    }
+  },
+  {
+    "id": "R_AG9CJY",
+    "data": {
+      "id": "R_AG9CJY",
+      "location_id": "puri",
+      "room_number": "208",
+      "room_type_id": "deluxe_VIP",
+      "name": "Bデラックスルーム",
+      "capacity": 4,
+      "current_price": 3000,
+      "description": "1〜4名用の広々としたデラックス個室",
+      "is_active": true,
+      "gender_restriction": "none",
+      "floor": 2,
+      "additional_amenities": [
+        "none"
+      ],
+      "created_at": "2025-05-07T00:00:00.000Z",
+      "updated_at": "2025-05-07T00:00:00.000Z",
+      "migration_version": "2.0_TARO_UNIFIED_UPPERCASE",
+      "migrated_at": "2025-06-04T11:24:19.482Z"
+    }
+  },
+  {
+    "id": "R_B6UZU2",
+    "data": {
+      "id": "R_B6UZU2",
+      "location_id": "varanasi",
+      "room_number": "203",
+      "room_type_id": "dormitory",
+      "name": "男性ドミトリー",
+      "capacity": 6,
+      "current_price": 700,
+      "description": "男性専用の相部屋タイプの部屋",
+      "is_active": true,
+      "gender_restriction": "male",
+      "floor": 2,
+      "additional_amenities": [
+        "none"
+      ],
+      "created_at": "2025-05-07T00:00:00.000Z",
+      "updated_at": "2025-05-07T00:00:00.000Z",
+      "migration_version": "2.0_TARO_UNIFIED_UPPERCASE",
+      "migrated_at": "2025-06-04T11:24:19.482Z"
+    }
+  },
+  {
+    "id": "R_DABJU8",
+    "data": {
+      "id": "R_DABJU8",
+      "location_id": "varanasi",
+      "room_number": "201",
+      "room_type_id": "single",
+      "name": "シングルルーム",
+      "capacity": 1,
+      "current_price": 1400,
+      "description": "1人用の個室",
+      "is_active": true,
+      "gender_restriction": "none",
+      "floor": 2,
+      "additional_amenities": [
+        "none"
+      ],
+      "created_at": "2025-05-07T00:00:00.000Z",
+      "updated_at": "2025-05-07T00:00:00.000Z",
+      "migration_version": "2.0_TARO_UNIFIED_UPPERCASE",
+      "migrated_at": "2025-06-04T11:24:19.482Z"
+    }
+  },
+  {
+    "id": "R_DT9KZ5",
+    "data": {
+      "id": "R_DT9KZ5",
+      "location_id": "varanasi",
+      "room_number": "102",
+      "room_type_id": "twin",
+      "name": "ツインルーム",
+      "capacity": 2,
+      "current_price": 1700,
+      "description": "1〜2人用の個室",
+      "is_active": true,
+      "gender_restriction": "none",
+      "floor": 1,
+      "additional_amenities": [
+        "none"
+      ],
+      "created_at": "2025-05-07T00:00:00.000Z",
+      "updated_at": "2025-05-07T00:00:00.000Z",
+      "migration_version": "2.0_TARO_UNIFIED_UPPERCASE",
+      "migrated_at": "2025-06-04T11:24:19.482Z"
+    }
+  },
+  {
+    "id": "R_DZQ56D",
+    "data": {
+      "id": "R_DZQ56D",
+      "location_id": "delhi",
+      "room_number": "202",
+      "room_type_id": "twin",
+      "name": "ツインルーム",
+      "capacity": 2,
+      "current_price": 1700,
+      "description": "1〜2人用の個室",
+      "is_active": true,
+      "gender_restriction": "none",
+      "floor": 2,
+      "additional_amenities": [
+        "none"
+      ],
+      "created_at": "2025-05-07T00:00:00.000Z",
+      "updated_at": "2025-05-07T00:00:00.000Z",
+      "migration_version": "2.0_TARO_UNIFIED_UPPERCASE",
+      "migrated_at": "2025-06-04T11:24:19.482Z"
+    }
+  },
+  {
+    "id": "R_E9V9X6",
+    "data": {
+      "id": "R_E9V9X6",
+      "location_id": "delhi",
+      "room_number": "301",
+      "room_type_id": "twin",
+      "name": "ツインルーム",
+      "capacity": 2,
+      "current_price": 1700,
+      "description": "1〜2人用の個室",
+      "is_active": true,
+      "gender_restriction": "none",
+      "floor": 3,
+      "additional_amenities": [
+        "none"
+      ],
+      "created_at": "2025-05-07T00:00:00.000Z",
+      "updated_at": "2025-05-07T00:00:00.000Z",
+      "migration_version": "2.0_TARO_UNIFIED_UPPERCASE",
+      "migrated_at": "2025-06-04T11:24:19.482Z"
+    }
+  },
+  {
+    "id": "R_EUKSSD",
+    "data": {
+      "id": "R_EUKSSD",
+      "location_id": "delhi",
+      "room_number": "401",
+      "room_type_id": "deluxe",
+      "name": "デラックスルーム",
+      "capacity": 2,
+      "current_price": 2300,
+      "description": "1〜2人用のデラックス個室",
+      "is_active": true,
+      "gender_restriction": "none",
+      "floor": 4,
+      "additional_amenities": [
+        "none"
+      ],
+      "created_at": "2025-05-07T00:00:00.000Z",
+      "updated_at": "2025-05-07T00:00:00.000Z",
+      "migration_version": "2.0_TARO_UNIFIED_UPPERCASE",
+      "migrated_at": "2025-06-04T11:24:19.482Z"
+    }
+  },
+  {
+    "id": "R_GLL47E",
+    "data": {
+      "id": "R_GLL47E",
+      "location_id": "varanasi",
+      "room_number": "304",
+      "room_type_id": "twin",
+      "name": "ツインルーム",
+      "capacity": 2,
+      "current_price": 1700,
+      "description": "1〜2人用の個室",
+      "is_active": true,
+      "gender_restriction": "none",
+      "floor": 3,
+      "additional_amenities": [
+        "none"
+      ],
+      "created_at": "2025-05-07T00:00:00.000Z",
+      "updated_at": "2025-05-07T00:00:00.000Z",
+      "migration_version": "2.0_TARO_UNIFIED_UPPERCASE",
+      "migrated_at": "2025-06-04T11:24:19.482Z"
+    }
+  },
+  {
+    "id": "R_H4PMXE",
+    "data": {
+      "id": "R_H4PMXE",
+      "location_id": "puri",
+      "room_number": "205",
+      "room_type_id": "dormitory",
+      "name": "男性ドミトリー",
+      "capacity": 4,
+      "current_price": 700,
+      "description": "男性専用の相部屋タイプの部屋",
+      "is_active": true,
+      "gender_restriction": "male",
+      "floor": 2,
+      "additional_amenities": [
+        "none"
+      ],
+      "created_at": "2025-05-07T00:00:00.000Z",
+      "updated_at": "2025-05-07T00:00:00.000Z",
+      "migration_version": "2.0_TARO_UNIFIED_UPPERCASE",
+      "migrated_at": "2025-06-04T11:24:19.482Z"
+    }
+  },
+  {
+    "id": "R_JYRSFE",
+    "data": {
+      "id": "R_JYRSFE",
+      "location_id": "puri",
+      "room_number": "302",
+      "room_type_id": "deluxe",
+      "name": "Aデラックスルーム",
+      "capacity": 2,
+      "current_price": 2300,
+      "description": "1〜2人用のデラックス個室",
+      "is_active": true,
+      "gender_restriction": "none",
+      "floor": 3,
+      "additional_amenities": [
+        "none"
+      ],
+      "created_at": "2025-05-07T00:00:00.000Z",
+      "updated_at": "2025-05-07T00:00:00.000Z",
+      "migration_version": "2.0_TARO_UNIFIED_UPPERCASE",
+      "migrated_at": "2025-06-04T11:24:19.482Z"
+    }
+  },
+  {
+    "id": "R_KN6ENF",
+    "data": {
+      "id": "R_KN6ENF",
+      "location_id": "puri",
+      "room_number": "306",
+      "room_type_id": "single",
+      "name": "シングルルーム",
+      "capacity": 1,
+      "current_price": 1400,
+      "description": "1人用の個室",
+      "is_active": true,
+      "gender_restriction": "none",
+      "floor": 3,
+      "additional_amenities": [
+        "none"
+      ],
+      "created_at": "2025-05-07T00:00:00.000Z",
+      "updated_at": "2025-05-07T00:00:00.000Z",
+      "migration_version": "2.0_TARO_UNIFIED_UPPERCASE",
+      "migrated_at": "2025-06-04T11:24:19.482Z"
+    }
+  },
+  {
+    "id": "R_L7AX5X",
+    "data": {
+      "id": "R_L7AX5X",
+      "location_id": "puri",
+      "room_number": "101",
+      "room_type_id": "single",
+      "name": "シングルルーム",
+      "capacity": 1,
+      "current_price": 1400,
+      "description": "1人用の個室",
+      "is_active": true,
+      "gender_restriction": "none",
+      "floor": 1,
+      "additional_amenities": [
+        "none"
+      ],
+      "created_at": "2025-05-07T00:00:00.000Z",
+      "updated_at": "2025-05-07T00:00:00.000Z",
+      "migration_version": "2.0_TARO_UNIFIED_UPPERCASE",
+      "migrated_at": "2025-06-04T11:24:19.482Z"
+    }
+  },
+  {
+    "id": "R_PE42ZL",
+    "data": {
+      "id": "R_PE42ZL",
+      "location_id": "delhi",
+      "room_number": "302",
+      "room_type_id": "dormitory",
+      "name": "男性ドミトリー",
+      "capacity": 6,
+      "current_price": 700,
+      "description": "男性専用の相部屋タイプの部屋",
+      "is_active": true,
+      "gender_restriction": "male",
+      "floor": 3,
+      "additional_amenities": [
+        "none"
+      ],
+      "created_at": "2025-05-07T00:00:00.000Z",
+      "updated_at": "2025-05-07T00:00:00.000Z",
+      "migration_version": "2.0_TARO_UNIFIED_UPPERCASE",
+      "migrated_at": "2025-06-04T11:24:19.482Z"
+    }
+  },
+  {
+    "id": "R_Q2RLTZ",
+    "data": {
+      "id": "R_Q2RLTZ",
+      "location_id": "puri",
+      "room_number": "305",
+      "room_type_id": "deluxe",
+      "name": "Aデラックスルーム",
+      "capacity": 2,
+      "current_price": 2300,
+      "description": "1〜2人用のデラックス個室",
+      "is_active": true,
+      "gender_restriction": "none",
+      "floor": 3,
+      "additional_amenities": [
+        "none"
+      ],
+      "created_at": "2025-05-07T00:00:00.000Z",
+      "updated_at": "2025-05-07T00:00:00.000Z",
+      "migration_version": "2.0_TARO_UNIFIED_UPPERCASE",
+      "migrated_at": "2025-06-04T11:24:19.482Z"
+    }
+  },
+  {
+    "id": "R_R35BW4",
+    "data": {
+      "id": "R_R35BW4",
+      "location_id": "puri",
+      "room_number": "204",
+      "room_type_id": "dormitory",
+      "name": "女性ドミトリー",
+      "capacity": 4,
+      "current_price": 700,
+      "description": "女性専用の相部屋タイプの部屋",
+      "is_active": true,
+      "gender_restriction": "female",
+      "floor": 2,
+      "additional_amenities": [
+        "none"
+      ],
+      "created_at": "2025-05-07T00:00:00.000Z",
+      "updated_at": "2025-05-07T00:00:00.000Z",
+      "migration_version": "2.0_TARO_UNIFIED_UPPERCASE",
+      "migrated_at": "2025-06-04T11:24:19.482Z"
+    }
+  },
+  {
+    "id": "R_RCT8V2",
+    "data": {
+      "id": "R_RCT8V2",
+      "location_id": "varanasi",
+      "room_number": "202",
+      "room_type_id": "dormitory",
+      "name": "女性ドミトリー",
+      "capacity": 6,
+      "current_price": 700,
+      "description": "女性専用の相部屋タイプの部屋",
+      "is_active": true,
+      "gender_restriction": "female",
+      "floor": 2,
+      "additional_amenities": [
+        "none"
+      ],
+      "created_at": "2025-05-07T00:00:00.000Z",
+      "updated_at": "2025-05-07T00:00:00.000Z",
+      "migration_version": "2.0_TARO_UNIFIED_UPPERCASE",
+      "migrated_at": "2025-06-04T11:24:19.482Z"
+    }
+  },
+  {
+    "id": "R_UJ999E",
+    "data": {
+      "id": "R_UJ999E",
+      "location_id": "delhi",
+      "room_number": "201",
+      "room_type_id": "dormitory",
+      "name": "女性ドミトリー",
+      "capacity": 6,
+      "current_price": 700,
+      "description": "女性専用の相部屋タイプの部屋",
+      "is_active": true,
+      "gender_restriction": "female",
+      "floor": 2,
+      "additional_amenities": [
+        "none"
+      ],
+      "created_at": "2025-05-02T05:27:07.868Z",
+      "updated_at": "2025-05-07T00:00:00.000Z",
+      "migration_version": "2.0_TARO_UNIFIED_UPPERCASE",
+      "migrated_at": "2025-06-04T11:24:19.482Z"
+    }
+  },
+  {
+    "id": "R_VS338B",
+    "data": {
+      "id": "R_VS338B",
+      "location_id": "puri",
+      "room_number": "209",
+      "room_type_id": "single",
+      "name": "シングルルーム",
+      "capacity": 1,
+      "current_price": 1400,
+      "description": "1人用の個室",
+      "is_active": true,
+      "gender_restriction": "none",
+      "floor": 2,
+      "additional_amenities": [
+        "none"
+      ],
+      "created_at": "2025-05-07T00:00:00.000Z",
+      "updated_at": "2025-05-07T00:00:00.000Z",
+      "migration_version": "2.0_TARO_UNIFIED_UPPERCASE",
+      "migrated_at": "2025-06-04T11:24:19.482Z"
+    }
+  },
+  {
+    "id": "R_W9VLB6",
+    "data": {
+      "id": "R_W9VLB6",
+      "location_id": "puri",
+      "room_number": "206",
+      "room_type_id": "deluxe",
+      "name": "Aデラックスルーム",
+      "capacity": 2,
+      "current_price": 2300,
+      "description": "1〜2人用のデラックス個室",
+      "is_active": true,
+      "gender_restriction": "none",
+      "floor": 2,
+      "additional_amenities": [
+        "none"
+      ],
+      "created_at": "2025-05-07T00:00:00.000Z",
+      "updated_at": "2025-05-07T00:00:00.000Z",
+      "migration_version": "2.0_TARO_UNIFIED_UPPERCASE",
+      "migrated_at": "2025-06-04T11:24:19.482Z"
+    }
+  },
+  {
+    "id": "R_YYPN52",
+    "data": {
+      "id": "R_YYPN52",
+      "location_id": "puri",
+      "room_number": "303",
+      "room_type_id": "deluxe",
+      "name": "Aデラックスルーム",
+      "capacity": 2,
+      "current_price": 2300,
+      "description": "1〜2人用のデラックス個室",
+      "is_active": true,
+      "gender_restriction": "none",
+      "floor": 3,
+      "additional_amenities": [
+        "none"
+      ],
+      "created_at": "2025-05-07T00:00:00.000Z",
+      "updated_at": "2025-05-07T00:00:00.000Z",
+      "migration_version": "2.0_TARO_UNIFIED_UPPERCASE",
+      "migrated_at": "2025-06-04T11:24:19.482Z"
+    }
+  }
+]

@@ -1,0 +1,18 @@
+[
+  {
+    "id": "pmt1d2e3f4a",
+    "data": {
+      "id": "pmt1d2e3f4a",
+      "parent_booking_id": "parent_rsva7f8d9e2",
+      "amount": 3500,
+      "currency": "INR",
+      "status": "paid",
+      "payment_method": "bank_transfer",
+      "payment_date": "2025-05-07T10:35:00.000Z",
+      "transaction_id": "txn12345678",
+      "receipt_number": "R20250507001",
+      "created_at": "2025-05-07T10:35:00.000Z",
+      "updated_at": "2025-05-07T10:35:00.000Z"
+    }
+  }
+]
