@@ -1,4 +1,4 @@
-// 🚀 backend/index.js - CORS問題修正版
+// 🚀 backend/index.js - CORS問題修正版 + ルート順序修正
 // 🎯 最小限構成でPhase 3.2対応
 
 const express = require('express');
@@ -149,7 +149,9 @@ app.get('/api/phase32-status', (req, res) => {
       'GET / - システム情報',
       'GET /api/health - ヘルスチェック',
       'GET /api/phase32-status - Phase 3.2 ステータス',
-      'GET /api/demo/privacy - プライバシー保護デモ'
+      'GET /api/demo/privacy - プライバシー保護デモ',
+      'GET /api/rooms - 部屋一覧',
+      'GET /api/rooms/available - 空室検索'
     ]
   });
 });
@@ -193,7 +195,7 @@ app.get('/api/demo/privacy', (req, res) => {
 });
 
 // ==========================================
-// 🎯 既存ルート読み込み（エラーセーフ）
+// 🎯 データベースミドルウェア
 // ==========================================
 
 // データベースミドルウェア
@@ -202,64 +204,8 @@ const dbMiddleware = (req, res, next) => {
   next();
 };
 
-// 安全なルート読み込み
-function loadExistingRoutes() {
-  const routesLoaded = {
-    rooms: false,
-    bookings: false
-  };
-
-  try {
-    const roomRoutes = require('./src/routes/rooms');
-    app.use('/api/rooms', dbMiddleware, roomRoutes);
-    routesLoaded.rooms = true;
-    console.log('✅ Room routes loaded');
-  } catch (error) {
-    console.warn('⚠️ Room routes not found - will create later');
-  }
-
-  try {
-    const bookingRoutes = require('./src/routes/bookings');
-    app.use('/api/bookings', dbMiddleware, bookingRoutes);
-    routesLoaded.bookings = true;
-    console.log('✅ Booking routes loaded');
-  } catch (error) {
-    console.warn('⚠️ Booking routes not found - will create later');
-  }
-
-  return routesLoaded;
-}
-
 // ==========================================
-// 🚨 エラーハンドリング
-// ==========================================
-
-// 404エラー
-app.use('*', (req, res) => {
-  res.status(404).json({
-    error: 'エンドポイントが見つかりません',
-    message: `${req.method} ${req.originalUrl} は存在しません`,
-    available_endpoints: [
-      'GET / - システム情報',
-      'GET /api/health - ヘルスチェック',
-      'GET /api/phase32-status - Phase 3.2 ステータス',
-      'GET /api/demo/privacy - プライバシー保護デモ'
-    ]
-  });
-});
-
-// グローバルエラーハンドラー
-app.use((error, req, res, next) => {
-  console.error('🚨 Server Error:', error.message);
-  res.status(500).json({
-    error: 'サーバーエラーが発生しました',
-    message: error.message,
-    timestamp: new Date().toISOString()
-  });
-});
-
-// ==========================================
-// 🚀 サーバー起動
+// 🚀 サーバー起動（修正版）
 // ==========================================
 
 async function startServer() {
@@ -267,8 +213,56 @@ async function startServer() {
     // Firebase初期化
     const firebaseInitialized = await initializeFirebase();
     
-    // 既存ルート読み込み
+    // 🔥 重要: ルート登録を404ハンドラーより前に配置
     const routesLoaded = loadExistingRoutes();
+    
+    // デバッグ用ルート追加
+    app.get('/api/routes-debug', (req, res) => {
+      res.json({
+        message: 'Routes debugging endpoint',
+        routes_loaded: routesLoaded,
+        available_routes: [
+          'GET /api/rooms - 全部屋取得',
+          'GET /api/rooms/available - 空室検索',
+          'GET /api/rooms/:id - 部屋詳細',
+          'GET /api/bookings - 全予約取得',
+          'POST /api/bookings - 予約作成'
+        ],
+        timestamp: new Date().toISOString()
+      });
+    });
+
+    // ==========================================
+    // 🚨 エラーハンドリング（最後に配置）
+    // ==========================================
+
+    // 404エラー（最後に配置）
+    app.use('*', (req, res) => {
+      console.log('🚨 404 Error for:', req.method, req.originalUrl);
+      res.status(404).json({
+        error: 'エンドポイントが見つかりません',
+        message: `${req.method} ${req.originalUrl} は存在しません`,
+        available_endpoints: [
+          'GET / - システム情報',
+          'GET /api/health - ヘルスチェック',
+          'GET /api/phase32-status - Phase 3.2 ステータス',
+          'GET /api/demo/privacy - プライバシー保護デモ',
+          'GET /api/rooms - 部屋一覧',
+          'GET /api/rooms/available - 空室検索',
+          'GET /api/routes-debug - ルートデバッグ'
+        ]
+      });
+    });
+
+    // グローバルエラーハンドラー
+    app.use((error, req, res, next) => {
+      console.error('🚨 Server Error:', error.message);
+      res.status(500).json({
+        error: 'サーバーエラーが発生しました',
+        message: error.message,
+        timestamp: new Date().toISOString()
+      });
+    });
     
     // サーバー起動
     const server = app.listen(port, () => {
@@ -292,8 +286,11 @@ async function startServer() {
   🔍 Health Check: http://localhost:${port}/api/health
   🎯 Phase 3.2 Status: http://localhost:${port}/api/phase32-status
   🎨 Privacy Demo: http://localhost:${port}/api/demo/privacy
+  🏠 Rooms API: http://localhost:${port}/api/rooms
+  🔍 Available Rooms: http://localhost:${port}/api/rooms/available
+  🔧 Routes Debug: http://localhost:${port}/api/routes-debug
 
-🎆 STATUS: CORS FIXED - SYSTEM OPERATIONAL! 🎆
+🎆 STATUS: ROUTES REGISTERED - SYSTEM OPERATIONAL! 🎆
 📝 Ready for Phase 3.2 feature development!
 `);
     });
@@ -319,6 +316,40 @@ async function startServer() {
     console.error('🚨 Server startup failed:', error);
     process.exit(1);
   }
+}
+
+// ==========================================
+// 🎯 ルート読み込み関数（startServer内で呼び出し）
+// ==========================================
+
+// 安全なルート読み込み
+function loadExistingRoutes() {
+  const routesLoaded = {
+    rooms: false,
+    bookings: false
+  };
+
+  try {
+    const roomRoutes = require('./src/routes/rooms');
+    app.use('/api/rooms', dbMiddleware, roomRoutes);
+    routesLoaded.rooms = true;
+    console.log('✅ Room routes loaded');
+  } catch (error) {
+    console.warn('⚠️ Room routes not found - will create later');
+    console.error('Room routes error:', error.message);
+  }
+
+  try {
+    const bookingRoutes = require('./src/routes/bookings');
+    app.use('/api/bookings', dbMiddleware, bookingRoutes);
+    routesLoaded.bookings = true;
+    console.log('✅ Booking routes loaded');
+  } catch (error) {
+    console.warn('⚠️ Booking routes not found - will create later');
+    console.error('Booking routes error:', error.message);
+  }
+
+  return routesLoaded;
 }
 
 // サーバー開始
