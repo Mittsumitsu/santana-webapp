@@ -10,6 +10,7 @@ const UserDashboard = () => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [copySuccess, setCopySuccess] = useState(''); // コピー成功状態管理
   
   // 🎯 Phase 3.2 新機能 - ソート・フィルタ
   const [sortBy, setSortBy] = useState('checkin_oldest');
@@ -351,6 +352,31 @@ const UserDashboard = () => {
     }
   };
 
+  // 📋 ユーザーIDコピー機能
+  const copyUserId = async () => {
+    try {
+      await navigator.clipboard.writeText(profile?.id);
+      setCopySuccess('userId');
+      setTimeout(() => setCopySuccess(''), 2000);
+    } catch (err) {
+      console.error('コピーに失敗しました:', err);
+      // フォールバック: 古いブラウザ対応
+      const textArea = document.createElement('textarea');
+      textArea.value = profile?.id;
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        setCopySuccess('userId');
+        setTimeout(() => setCopySuccess(''), 2000);
+      } catch (fallbackErr) {
+        console.error('フォールバックコピーも失敗:', fallbackErr);
+      }
+      document.body.removeChild(textArea);
+    }
+  };
+
   // イベントハンドラー
   const handleRebook = (booking) => {
     const searchParams = new URLSearchParams({
@@ -401,10 +427,19 @@ const UserDashboard = () => {
           <div className="user-details">
             <h1>{profile?.displayName}</h1>
             <p className="user-email">{profile?.email}</p>
+            <div className="user-id-container">
+              <p className="user-email">ID: {profile?.id}</p>
+              <button 
+                className={`copy-button ${copySuccess === 'userId' ? 'copied' : ''}`}
+                onClick={copyUserId}
+                title="ユーザーIDをコピー"
+              >
+                {copySuccess === 'userId' ? '✓' : '⧉'}
+              </button>
+            </div>
             <span className="user-type-badge">
               {currentUser?.emailVerified ? '✅ 認証済み' : '⚠️ 未認証'}
             </span>
-            <div className="user-id">ID: {profile?.id}</div>
           </div>
         </div>
         <div className="header-actions">
@@ -414,27 +449,6 @@ const UserDashboard = () => {
           <button className="logout-btn" onClick={handleLogout}>
             ログアウト
           </button>
-        </div>
-      </div>
-
-      {/* 🔒 プライバシー保護バナー */}
-      <div className="privacy-protection-banner">
-        <div className="banner-content">
-          <span className="banner-icon">🔒</span>
-          <div className="banner-text">
-            <strong>プライバシー保護機能</strong>
-            <p>セキュリティ向上のため、具体的な部屋番号は表示されません。チェックイン時にご案内いたします。</p>
-          </div>
-          <div className="privacy-toggle">
-            <label className="toggle-switch">
-              <input
-                type="checkbox"
-                checked={privacyProtectionEnabled}
-                onChange={(e) => setPrivacyProtectionEnabled(e.target.checked)}
-              />
-              <span className="toggle-slider"></span>
-            </label>
-          </div>
         </div>
       </div>
 

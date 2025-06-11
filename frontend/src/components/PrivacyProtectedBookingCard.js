@@ -1,10 +1,12 @@
 // frontend/src/components/PrivacyProtectedBookingCard.js
 // 🔒 プライバシー保護版予約カード
 
-import React from 'react';
+import React, { useState } from 'react';
 import './PrivacyProtectedBookingCard.css';
 
 const PrivacyProtectedBookingCard = ({ booking }) => {
+  const [copySuccess, setCopySuccess] = useState(false);
+
   // 🔒 プライバシー保護: 顧客向け表示データのみ
   const getCustomerDisplayInfo = (booking) => {
     return {
@@ -89,6 +91,31 @@ const PrivacyProtectedBookingCard = ({ booking }) => {
     
     return statusMap[status] || { text: status, icon: '❓', class: 'status-unknown' };
   };
+
+  // 📋 予約番号コピー機能
+  const copyBookingId = async () => {
+    try {
+      await navigator.clipboard.writeText(booking.id);
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000);
+    } catch (err) {
+      console.error('コピーに失敗しました:', err);
+      // フォールバック: 古いブラウザ対応
+      const textArea = document.createElement('textarea');
+      textArea.value = booking.id;
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        setCopySuccess(true);
+        setTimeout(() => setCopySuccess(false), 2000);
+      } catch (fallbackErr) {
+        console.error('フォールバックコピーも失敗:', fallbackErr);
+      }
+      document.body.removeChild(textArea);
+    }
+  };
   
   const displayInfo = getCustomerDisplayInfo(booking);
   const statusInfo = getStatusDisplay(displayInfo.status);
@@ -97,9 +124,21 @@ const PrivacyProtectedBookingCard = ({ booking }) => {
     <div className="privacy-protected-booking-card">
       {/* 🔒 プライバシー保護ヘッダー */}
       <div className="booking-header">
-        <div className="booking-id">
+        <div className="booking-id-section">
           <span className="booking-label">予約番号</span>
-          <span className="booking-number">{booking.id}</span>
+          <div className="booking-id-container">
+            <span className="booking-number">{booking.id}</span>
+            <button 
+              className={`copy-button ${copySuccess ? 'copied' : ''}`}
+              onClick={copyBookingId}
+              title="予約番号をコピー"
+            >
+              {copySuccess ? '✓' : '⧉'}
+            </button>
+          </div>
+          {copySuccess && (
+            <span className="copy-success-message">コピーしました！</span>
+          )}
         </div>
         <div className={`booking-status ${statusInfo.class}`}>
           <span className="status-icon">{statusInfo.icon}</span>
@@ -144,7 +183,7 @@ const PrivacyProtectedBookingCard = ({ booking }) => {
         </div>
         
         <div className="guest-info">
-          <span className="guest-icon">👥</span>
+          <span className="guest-icon">👤</span>
           <span className="guest-count">{displayInfo.totalGuests}名様</span>
         </div>
       </div>
@@ -162,15 +201,8 @@ const PrivacyProtectedBookingCard = ({ booking }) => {
         </div>
       </div>
       
-      {/* 🔒 プライバシー保護フッター */}
+      {/* 🔒 アクションボタン */}
       <div className="booking-footer">
-        <div className="privacy-notice">
-          <span className="privacy-icon">🔒</span>
-          <span className="privacy-text">
-            チェックイン時に具体的な部屋をご案内いたします
-          </span>
-        </div>
-        
         <div className="booking-actions">
           <button className="action-button view-details">
             詳細を見る

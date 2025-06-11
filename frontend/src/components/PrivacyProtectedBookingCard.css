@@ -22,14 +22,18 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 20px;
-    padding-bottom: 16px;
+    margin-bottom: 24px;
+    padding-bottom: 20px;
     border-bottom: 1px solid #e9ecef;
   }
   
-  .booking-id {
+  /* 📋 予約番号セクション（ゆったりスペース） */
+  .booking-id-section {
     display: flex;
     flex-direction: column;
+    gap: 8px;
+    flex: 1;
+    max-width: 350px;
   }
   
   .booking-label {
@@ -41,11 +45,82 @@
     letter-spacing: 0.5px;
   }
   
+  .booking-id-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+  }
+  
+  .booking-id-container:hover {
+    background: #e9ecef;
+    border-color: #dee2e6;
+  }
+  
   .booking-number {
     font-size: 16px;
     font-weight: 700;
     color: #2c3e50;
     font-family: 'Courier New', monospace;
+    letter-spacing: 0.5px;
+    flex: 1;
+    user-select: all;
+  }
+  
+  /* 📋 コピーボタン */
+  .copy-button {
+    background: #ffffff;
+    color: #495057;
+    border: 2px solid #007bff;
+    border-radius: 4px;
+    padding: 4px 6px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: monospace;
+    font-weight: bold;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .copy-button:hover {
+    background: #007bff;
+    color: white;
+    transform: scale(1.05);
+    box-shadow: 0 2px 6px rgba(0, 123, 255, 0.3);
+  }
+  
+  .copy-button.copied {
+    background: #28a745;
+    color: white;
+    border-color: #28a745;
+    animation: copied-pulse 0.6s ease;
+  }
+  
+  @keyframes copied-pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+  }
+  
+  .copy-success-message {
+    font-size: 12px;
+    color: #28a745;
+    font-weight: 500;
+    animation: fade-in 0.3s ease;
+  }
+  
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
   }
   
   /* ステータス表示 */
@@ -58,6 +133,7 @@
     font-size: 14px;
     font-weight: 600;
     white-space: nowrap;
+    flex-shrink: 0;
   }
   
   .status-confirmed {
@@ -233,32 +309,13 @@
     font-style: italic;
   }
   
-  /* 🔒 プライバシー保護フッター */
+  /* 🔒 フッター（プライバシーメッセージ削除） */
   .booking-footer {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     align-items: center;
     padding-top: 16px;
     border-top: 1px solid #e9ecef;
-  }
-  
-  .privacy-notice {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex: 1;
-  }
-  
-  .privacy-icon {
-    font-size: 16px;
-    color: #007bff;
-  }
-  
-  .privacy-text {
-    font-size: 13px;
-    color: #6c757d;
-    font-style: italic;
-    line-height: 1.4;
   }
   
   .booking-actions {
@@ -302,6 +359,10 @@
       flex-direction: column;
       gap: 12px;
       align-items: stretch;
+    }
+    
+    .booking-id-section {
+      max-width: 100%;
     }
     
     .booking-dates {
@@ -350,6 +411,21 @@
     .action-button {
       flex: 1;
       text-align: center;
+    }
+    
+    .booking-id-container {
+      padding: 10px 12px;
+    }
+    
+    .booking-number {
+      font-size: 14px;
+    }
+    
+    .copy-button {
+      padding: 3px 5px;
+      min-width: 24px;
+      height: 24px;
+      font-size: 12px;
     }
   }
   
