@@ -18,129 +18,39 @@ const BookingForm = ({ bookingData, onSubmit, loading }) => {
     roomGuests: [], // 各部屋のゲスト情報
     arrivalTime: '14:00',
     notes: '',
-    agreeToTerms: false,
-    // 🆕 新機能: ユーザーデータ管理
-    saveUserData: true,
-    autoFillEnabled: true
+    agreeToTerms: false
   });
 
   const [formError, setFormError] = useState(null);
   const [validationErrors, setValidationErrors] = useState({});
-  
-  // 🆕 新機能: プロフィール管理状態
-  const [savedUserProfiles, setSavedUserProfiles] = useState([]);
-  const [isLoadingUserData, setIsLoadingUserData] = useState(false);
-  const [showProfileSelector, setShowProfileSelector] = useState(false);
 
-  // 🆕 新機能: 保存済みプロフィールを取得
-  const fetchSavedUserProfiles = async (userId) => {
-    try {
-      const response = await fetch(`/api/users/${userId}/profiles`);
-      if (response.ok) {
-        return await response.json();
-      }
-      return [];
-    } catch (error) {
-      console.error('プロフィール取得エラー:', error);
-      return [];
-    }
-  };
-
-  // 🆕 新機能: プロフィールを保存
-  const saveUserProfile = async (profileData, isDefault = false) => {
-    try {
-      const userId = getUserId();
-      const response = await fetch(`/api/users/${userId}/profiles`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contactInfo: profileData,
-          isDefault,
-          name: profileData.profileName || `プロフィール ${new Date().getMonth() + 1}月${new Date().getDate()}日`,
-          createdAt: new Date().toISOString()
-        })
-      });
-
-      if (response.ok) {
-        const newProfile = await response.json();
-        setSavedUserProfiles(prev => [...prev, newProfile]);
-        return newProfile;
-      }
-    } catch (error) {
-      console.error('プロフィール保存エラー:', error);
-    }
-  };
-
-  // 🆕 新機能: プロフィール選択
-  const handleProfileSelect = (profile) => {
-    setFormData(prev => ({
-      ...prev,
-      primaryContact: {
-        ...prev.primaryContact,
-        ...profile.contactInfo
-      }
-    }));
-    setShowProfileSelector(false);
-  };
-
-  // 🎯 認証状態の確認 + 🆕 プロフィール自動読み込み
+  // 🎯 認証状態の確認
   useEffect(() => {
-    const loadUserData = async () => {
-      setIsLoadingUserData(true);
-      
-      try {
-        const userId = getUserId();
-        const userData = getUserData();
-        
-        console.log('🎯 BookingForm認証情報確認:', {
-          userId,
-          userData: userData ? { id: userData.id, email: userData.email } : null,
-          currentUser: currentUser ? { uid: currentUser.uid, email: currentUser.email } : null
-        });
-        
-        if (!userId) {
-          setFormError('ユーザー認証情報が見つかりません。再ログインしてください。');
-          return;
+    const userId = getUserId();
+    const userData = getUserData();
+    
+    console.log('🎯 BookingForm認証情報確認:', {
+      userId,
+      userData: userData ? { id: userData.id, email: userData.email } : null,
+      currentUser: currentUser ? { uid: currentUser.uid, email: currentUser.email } : null
+    });
+    
+    if (!userId) {
+      setFormError('ユーザー認証情報が見つかりません。再ログインしてください。');
+      return;
+    }
+    
+    // ユーザー情報を自動入力
+    if (userData) {
+      setFormData(prev => ({
+        ...prev,
+        primaryContact: {
+          ...prev.primaryContact,
+          email: userData.email || currentUser?.email || '',
+          // 必要に応じて他の情報も自動入力
         }
-        
-        // 🆕 保存済みプロフィールを取得
-        const profiles = await fetchSavedUserProfiles(userId);
-        setSavedUserProfiles(profiles);
-        
-        // ユーザー情報を自動入力
-        if (userData) {
-          // デフォルトプロフィールがあれば使用、なければ基本情報のみ
-          const defaultProfile = profiles.find(p => p.isDefault);
-          
-          if (defaultProfile) {
-            setFormData(prev => ({
-              ...prev,
-              primaryContact: {
-                ...prev.primaryContact,
-                ...defaultProfile.contactInfo,
-                email: userData.email || currentUser?.email || defaultProfile.contactInfo.email
-              }
-            }));
-          } else {
-            setFormData(prev => ({
-              ...prev,
-              primaryContact: {
-                ...prev.primaryContact,
-                email: userData.email || currentUser?.email || '',
-              }
-            }));
-          }
-        }
-      } catch (error) {
-        console.error('❌ ユーザーデータ読み込みエラー:', error);
-      } finally {
-        setIsLoadingUserData(false);
-      }
-    };
-
-    loadUserData();
+      }));
+    }
   }, [getUserId, getUserData, currentUser]);
 
   // bookingDataが変更されたときに初期化
@@ -373,17 +283,12 @@ const BookingForm = ({ bookingData, onSubmit, loading }) => {
     return true;
   };
 
-  // フォーム送信 + 🆕 プロフィール保存機能
-  const handleSubmit = async (e) => {
+  // フォーム送信
+  const handleSubmit = (e) => {
     e.preventDefault();
     
     if (!validateForm()) {
       return;
-    }
-
-    // 🆕 ユーザーデータ保存オプションが有効な場合
-    if (formData.saveUserData) {
-      await saveUserProfile(formData.primaryContact, savedUserProfiles.length === 0);
     }
 
     // 🎯 正しいユーザーIDを使用
@@ -434,49 +339,6 @@ const BookingForm = ({ bookingData, onSubmit, loading }) => {
   return (
     <div className="booking-form-container">
       <h2>予約者情報の入力</h2>
-      
-      {/* 🆕 新機能: プロフィール管理セクション */}
-      {savedUserProfiles.length > 0 && (
-        <div className="user-data-controls">
-          <div className="profile-section">
-            <h3>📋 保存済みプロフィール</h3>
-            {isLoadingUserData ? (
-              <div className="loading-profiles">読み込み中...</div>
-            ) : (
-              <div className="profile-buttons">
-                <button
-                  type="button"
-                  className="profile-toggle-btn"
-                  onClick={() => setShowProfileSelector(!showProfileSelector)}
-                >
-                  {showProfileSelector ? '閉じる' : `プロフィール選択 (${savedUserProfiles.length}件)`}
-                </button>
-                
-                {showProfileSelector && (
-                  <div className="profile-selector">
-                    {savedUserProfiles.map((profile, index) => (
-                      <button
-                        key={index}
-                        type="button"
-                        className="profile-item"
-                        onClick={() => handleProfileSelect(profile)}
-                      >
-                        <div className="profile-info">
-                          <strong>{profile.name}</strong>
-                          <span>
-                            {profile.contactInfo.lastNameRomaji} {profile.contactInfo.firstNameRomaji}
-                          </span>
-                          {profile.isDefault && <span className="default-badge">既定</span>}
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
       
       {formError && (
         <div className="form-error-message">
@@ -569,8 +431,6 @@ const BookingForm = ({ bookingData, onSubmit, loading }) => {
               <div className="field-error">{validationErrors['primaryContact.email']}</div>
             )}
           </div>
-
-
           
           <div className="form-group full-width">
             <label htmlFor="primaryGender">性別 *</label>
@@ -588,7 +448,7 @@ const BookingForm = ({ bookingData, onSubmit, loading }) => {
           </div>
         </div>
 
-        {/* 既存の部屋ゲスト情報セクション（変更なし） */}
+        {/* 各部屋のゲスト情報 */}
         {formData.roomGuests.map((room, roomIndex) => (
           <div key={room.roomId} className="form-section">
             <h3>{room.roomName} のゲスト情報</h3>
@@ -596,7 +456,7 @@ const BookingForm = ({ bookingData, onSubmit, loading }) => {
               {room.guests.map((guest, guestIndex) => (
                 <div key={guestIndex} className="guest-form">
                   <div className="guest-header">
-                    <h4>ゲスト {guestIndex + 1}</h4>
+                    <h4>ゲスト {guestIndex + 1} ({guest.gender === 'male' ? '男性' : '女性'})</h4>
                     <button
                       type="button"
                       className={`primary-btn ${guest.isPrimary ? 'active' : ''}`}
@@ -686,23 +546,6 @@ const BookingForm = ({ bookingData, onSubmit, loading }) => {
               rows="4"
               placeholder="特別なリクエストや注意事項があればご記入ください"
             />
-          </div>
-        </div>
-
-        {/* 🆕 新機能: データ保存オプション */}
-        <div className="form-section">
-          <h3>データ保存設定</h3>
-          <div className="checkbox-group">
-            <label className="checkbox-label">
-              <input
-                type="checkbox"
-                name="saveUserData"
-                checked={formData.saveUserData}
-                onChange={handleChange}
-              />
-              <span className="checkmark"></span>
-              今回の情報をプロフィールとして保存する（次回入力が簡単になります）
-            </label>
           </div>
         </div>
 
