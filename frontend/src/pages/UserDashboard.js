@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import PrivacyProtectedBookingCard from '../components/PrivacyProtectedBookingCard';
 import axios from 'axios';
 import './UserDashboard.css';
 
@@ -11,11 +12,13 @@ const UserDashboard = () => {
   const [error, setError] = useState(null);
   
   // 🎯 Phase 3.2 新機能 - ソート・フィルタ
-  const [sortBy, setSortBy] = useState('checkin_oldest'); // デフォルトをチェックイン近い順に
-  const [filterStatus, setFilterStatus] = useState('all'); // 'all', 'confirmed', 'pending', 'cancelled', 'completed'
+  const [sortBy, setSortBy] = useState('checkin_oldest');
+  const [filterStatus, setFilterStatus] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  
+  // 🔒 Phase 3.2 プライバシー保護フラグ
+  const [privacyProtectionEnabled, setPrivacyProtectionEnabled] = useState(true);
 
-  // 🎯 新IDフォーマット対応認証情報取得
   const { currentUser, logout, getUserId, getUserData } = useAuth();
 
   useEffect(() => {
@@ -29,7 +32,6 @@ const UserDashboard = () => {
       setLoading(true);
       setError(null);
       
-      // 🎯 新IDフォーマットユーザーIDを取得
       const userId = getUserId();
       const userData = getUserData();
       
@@ -39,7 +41,6 @@ const UserDashboard = () => {
         email: userData?.email || currentUser?.email
       });
       
-      // プロフィール情報を設定
       setProfile({
         id: userId,
         displayName: userData?.displayName || currentUser?.displayName || 'ユーザー',
@@ -52,7 +53,6 @@ const UserDashboard = () => {
         }
       });
       
-      // 🎯 新IDフォーマットで予約データを取得
       if (userId) {
         try {
           console.log('📋 予約履歴取得開始:', userId);
@@ -77,60 +77,53 @@ const UserDashboard = () => {
         } catch (apiError) {
           console.error('❌ 予約API呼び出しエラー:', apiError);
           
-          // 🎯 現行データでフォールバック（開発中表示用）
-          console.log('🔧 開発中 - サンプルデータを表示');
+          // 🎯 フォールバック用サンプルデータ
           const mockBookings = [
             {
-              id: "B_5PMGVWYHSWPL",
-              check_in_date: "2025-07-06",
-              check_out_date: "2025-07-08", 
+              id: "B_YRDQ2K7UEQWC",
+              check_in_date: "2025-06-13",
+              check_out_date: "2025-06-16", 
               status: "confirmed",
-              number_of_guests: 2,
-              room_amount: 2300,
-              total_amount: 2300,
-              room_name: "デラックスルーム",
-              room_type: "deluxe",
+              total_guests: 3,
+              total_amount: 3100,
+              rooms: [
+                {
+                  room_id: "R_2BWH77",
+                  room_type_id: "twin",
+                  room_name: "ツインルーム",
+                  number_of_guests: 2,
+                  room_amount: 1700,
+                  room_snapshot: {
+                    room_type_id: "twin",
+                    room_type_name: "ツインルーム",
+                    location_id: "delhi",
+                    capacity: 2
+                  }
+                },
+                {
+                  room_id: "R_62SM8Y",
+                  room_type_id: "single", 
+                  room_name: "シングルルーム",
+                  number_of_guests: 1,
+                  room_amount: 1400,
+                  room_snapshot: {
+                    room_type_id: "single",
+                    room_type_name: "シングルルーム",
+                    location_id: "delhi",
+                    capacity: 1
+                  }
+                }
+              ],
               primary_contact: {
-                name_kanji: "テスト 次郎",
-                email: "jiro@test.com"
+                name_kanji: "テスト 太郎",
+                name_romaji: "TEST TARO",
+                email: "oo00mixan00oo@icloud.com"
               },
-              created_at: "2025-06-04T22:35:50.000Z"
-            },
-            {
-              id: "B_VYP6Z5USK3FZ",
-              check_in_date: "2025-06-30",
-              check_out_date: "2025-07-03", 
-              status: "confirmed",
-              number_of_guests: 2,
-              room_amount: 5100,
-              total_amount: 15300,
-              room_name: "お部屋",
-              room_type: "deluxe",
-              primary_contact: {
-                name_kanji: "テスト太郎",
-                email: "test@example.com"
-              },
-              created_at: "2025-06-05T22:35:50.000Z"
-            },
-            {
-              id: "B_ABC123XYZ789",
-              check_in_date: "2025-05-15",
-              check_out_date: "2025-05-17", 
-              status: "completed",
-              number_of_guests: 1,
-              room_amount: 1400,
-              total_amount: 2800,
-              room_name: "シングルルーム",
-              room_type: "single",
-              primary_contact: {
-                name_kanji: "テスト花子",
-                email: "hanako@test.com"
-              },
-              created_at: "2025-05-10T15:20:30.000Z"
+              created_at: "2025-06-11T11:50:58Z"
             }
           ];
           setBookings(mockBookings);
-          setError('新IDシステム移行中です。モックデータを表示しています。');
+          setError('新IDシステム移行中です。サンプルデータを表示しています。');
         }
       } else {
         console.log('⚠️ ユーザーIDが取得できませんでした');
@@ -154,13 +147,15 @@ const UserDashboard = () => {
       filtered = filtered.filter(booking => booking.status === filterStatus);
     }
 
-    // 検索フィルタ（部屋名・予約IDで検索）
+    // 検索フィルタ
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(booking => 
-        booking.room_name?.toLowerCase().includes(query) ||
         booking.id?.toLowerCase().includes(query) ||
-        booking.room_type?.toLowerCase().includes(query)
+        booking.rooms?.some(room => 
+          room.room_name?.toLowerCase().includes(query) ||
+          room.room_type_id?.toLowerCase().includes(query)
+        )
       );
     }
 
@@ -189,14 +184,13 @@ const UserDashboard = () => {
         filtered.sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
         break;
       default:
-        // デフォルトはチェックイン近い順
         filtered.sort((a, b) => new Date(a.check_in_date) - new Date(b.check_in_date));
     }
 
     return filtered;
   };
 
-  // 🎯 Phase 3.2 改善: より詳細なステータスバッジ
+  // 🎯 Phase 3.2 改善: ステータスバッジ
   const getStatusBadge = (status) => {
     const statusMap = {
       confirmed: { 
@@ -242,17 +236,15 @@ const UserDashboard = () => {
     );
   };
 
-  // 🎯 Phase 3.2 改善: より美しい日付表示
+  // 🎯 Phase 3.2 改善: 日付表示
   const formatDate = (dateString, includeWeekday = false) => {
     if (!dateString) return 'Invalid Date';
     
-    // Firestore Timestampオブジェクトの場合（_seconds形式）
     if (dateString && typeof dateString === 'object' && dateString._seconds) {
       const date = new Date(dateString._seconds * 1000);
       return formatDateObject(date, includeWeekday);
     }
     
-    // 通常の日付文字列の場合
     const date = new Date(dateString);
     if (isNaN(date.getTime())) {
       return 'Invalid Date';
@@ -275,81 +267,32 @@ const UserDashboard = () => {
     return date.toLocaleDateString('ja-JP', options);
   };
 
-  // 🎯 Phase 3.2 改善: 部屋タイプ表示（実際のデータ構造対応）
+  // 🔒 プライバシー保護: 部屋タイプ表示（部屋番号除去）
   const getRoomDisplayName = (booking) => {
-    // rooms配列から部屋タイプを取得
-    if (booking.rooms && booking.rooms.length > 0) {
-      const roomTypes = booking.rooms.map(room => {
-        if (room.room_id) {
-          // 実際のroom_idに基づくマッピング
-          const roomId = room.room_id;
-          
-          // 各部屋のroom_type_idから部屋タイプを特定
-          // 実際のrooms.jsonデータに基づく
-          const roomTypeMap = {
-            // Delhi
-            'delhi-101': 'single',
-            'delhi-201': 'dormitory', 
-            'delhi-202': 'twin',
-            'delhi-203': 'single',
-            'delhi-301': 'twin',
-            'delhi-302': 'dormitory',
-            'delhi-303': 'twin', 
-            'delhi-401': 'deluxe',
-            
-            // Varanasi
-            'varanasi-101': 'twin',
-            'varanasi-102': 'twin',
-            'varanasi-201': 'single',
-            'varanasi-202': 'dormitory',
-            'varanasi-203': 'dormitory',
-            'varanasi-301': 'deluxe',
-            'varanasi-304': 'twin',
-            'varanasi-305': 'deluxe',
-            
-            // Puri
-            'puri-101': 'single',
-            'puri-203': 'deluxe',
-            'puri-204': 'dormitory',
-            'puri-205': 'dormitory',
-            'puri-206': 'deluxe',
-            'puri-208': 'deluxe_VIP',
-            'puri-209': 'single',
-            'puri-302': 'deluxe',
-            'puri-303': 'deluxe',
-            'puri-304': 'deluxe',
-            'puri-305': 'deluxe',
-            'puri-306': 'single',
-            'puri-307': 'single'
-          };
-          
-          const roomTypeId = roomTypeMap[roomId];
-          
-          if (roomTypeId) {
-            const typeMap = {
-              'single': 'シングルルーム',
-              'twin': 'ツインルーム', 
-              'deluxe': 'デラックスルーム',
-              'dormitory': 'ドミトリー',
-              'deluxe_VIP': 'VIPルーム'
-            };
-            return typeMap[roomTypeId] || roomTypeId;
-          }
-        }
-        return '不明';
-      });
+    if (booking.rooms && Array.isArray(booking.rooms) && booking.rooms.length > 0) {
+      const typeMap = {
+        'single': 'シングルルーム',
+        'twin': 'ツインルーム', 
+        'deluxe': 'デラックスルーム',
+        'dormitory': 'ドミトリー',
+        'deluxe_VIP': 'VIPルーム'
+      };
       
-      // 重複を除去して表示
-      const uniqueTypes = [...new Set(roomTypes)];
+      const uniqueTypes = [...new Set(booking.rooms.map(room => {
+        const roomType = room.room_snapshot?.room_type_id || room.room_type_id || 'unknown';
+        return typeMap[roomType] || roomType;
+      }))];
       
       if (uniqueTypes.length === 1) {
-        return booking.rooms.length === 1 ? uniqueTypes[0] : `${uniqueTypes[0]} (${booking.rooms.length}室)`;
-      } else if (uniqueTypes.length > 1) {
+        return booking.rooms.length === 1 ? 
+          uniqueTypes[0] : 
+          `${uniqueTypes[0]} (${booking.rooms.length}室)`;
+      } else {
         return `${uniqueTypes.join('・')} (${booking.rooms.length}室)`;
       }
     }
     
-    // フォールバック: 従来のroom_typeフィールドを使用
+    // フォールバック
     if (booking.room_type) {
       const typeMap = {
         'single': 'シングルルーム',
@@ -364,24 +307,37 @@ const UserDashboard = () => {
     return '部屋タイプ不明';
   };
 
-  // 🎯 Phase 3.2 改善: 宿泊日数の計算（料金は保存データをそのまま使用）
+  // 🔒 店舗情報表示（プライバシー保護版）
+  const getLocationDisplay = (booking) => {
+    const locationMap = {
+      'delhi': 'デリー店',
+      'varanasi': 'バラナシ店',
+      'puri': 'プリー店'
+    };
+    
+    if (booking.rooms && booking.rooms.length > 0) {
+      const locationId = booking.rooms[0].room_snapshot?.location_id;
+      return locationMap[locationId] || locationId || '店舗不明';
+    }
+    
+    return '店舗不明';
+  };
+
+  // 宿泊日数計算
   const calculateStayDetails = (checkIn, checkOut) => {
     const start = new Date(checkIn);
     const end = new Date(checkOut);
     const nights = Math.floor((end - start) / (1000 * 60 * 60 * 24));
     
-    return {
-      nights
-    };
+    return { nights };
   };
 
-  // 🎯 Phase 3.2 改善: 予約期間の状態判定
+  // 予約期間の状態判定
   const getBookingPeriodStatus = (checkIn, checkOut) => {
     const now = new Date();
     const startDate = new Date(checkIn);
     const endDate = new Date(checkOut);
     
-    // 今日の日付（時間は00:00:00に設定）
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const checkinDate = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
     const checkoutDate = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
@@ -395,13 +351,14 @@ const UserDashboard = () => {
     }
   };
 
-        const handleRebook = (booking) => {
+  // イベントハンドラー
+  const handleRebook = (booking) => {
     const searchParams = new URLSearchParams({
       checkIn: booking.check_in_date,
       checkOut: booking.check_out_date,
       totalGuests: booking.total_guests || booking.number_of_guests || 1,
-      // 🎯 部屋IDから店舗を推測
-      location: booking.room_id?.split('-')[0] || 'delhi'
+      location: getLocationDisplay(booking).includes('デリー') ? 'delhi' : 
+               getLocationDisplay(booking).includes('バラナシ') ? 'varanasi' : 'puri'
     });
     
     window.location.href = `/?${searchParams.toString()}`;
@@ -431,7 +388,6 @@ const UserDashboard = () => {
     );
   }
 
-  // 🎯 Phase 3.2: フィルタ・ソート済みの予約データを取得
   const filteredBookings = getFilteredAndSortedBookings();
 
   return (
@@ -445,18 +401,40 @@ const UserDashboard = () => {
           <div className="user-details">
             <h1>{profile?.displayName}</h1>
             <p className="user-email">{profile?.email}</p>
-            <span className="user-type-badge">Guest</span>
-            {/* 🎯 新IDフォーマット表示 */}
+            <span className="user-type-badge">
+              {currentUser?.emailVerified ? '✅ 認証済み' : '⚠️ 未認証'}
+            </span>
             <div className="user-id">ID: {profile?.id}</div>
           </div>
         </div>
         <div className="header-actions">
           <button className="refresh-btn" onClick={handleRefresh} title="データを更新">
-            🔄
+            🔄 更新
           </button>
           <button className="logout-btn" onClick={handleLogout}>
             ログアウト
           </button>
+        </div>
+      </div>
+
+      {/* 🔒 プライバシー保護バナー */}
+      <div className="privacy-protection-banner">
+        <div className="banner-content">
+          <span className="banner-icon">🔒</span>
+          <div className="banner-text">
+            <strong>プライバシー保護機能</strong>
+            <p>セキュリティ向上のため、具体的な部屋番号は表示されません。チェックイン時にご案内いたします。</p>
+          </div>
+          <div className="privacy-toggle">
+            <label className="toggle-switch">
+              <input
+                type="checkbox"
+                checked={privacyProtectionEnabled}
+                onChange={(e) => setPrivacyProtectionEnabled(e.target.checked)}
+              />
+              <span className="toggle-slider"></span>
+            </label>
+          </div>
         </div>
       </div>
 
@@ -495,12 +473,11 @@ const UserDashboard = () => {
 
       {/* タブコンテンツ */}
       <div className="dashboard-content">
-        {/* 🎯 Phase 3.2 改善: 予約履歴タブ */}
         {activeTab === 'bookings' && (
           <div className="bookings-section">
             <div className="section-header">
               <h2>📅 予約履歴</h2>
-              <p>新IDフォーマット対応 - Phase 3.2改善版</p>
+              <p>Phase 3.2 プライバシー保護対応版</p>
               {bookings.length > 0 && (
                 <div className="bookings-stats">
                   <span className="stat-item">
@@ -513,14 +490,14 @@ const UserDashboard = () => {
               )}
             </div>
 
-            {/* 🎯 Phase 3.2 新機能: 検索・フィルタ・ソート */}
+            {/* 検索・フィルタ・ソート */}
             {bookings.length > 0 && (
               <div className="bookings-controls">
                 <div className="search-controls">
                   <div className="search-input">
                     <input
                       type="text"
-                      placeholder="🔍 予約ID・部屋名で検索..."
+                      placeholder="🔍 予約ID・部屋タイプで検索..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="search-field"
@@ -568,7 +545,7 @@ const UserDashboard = () => {
                 </h3>
                 <p>
                   {bookings.length === 0 
-                    ? '新しい予約を作成してテストしてみましょう。'
+                    ? '新しい予約を作成してみましょう。'
                     : '検索条件を変更して再度お試しください。'
                   }
                 </p>
@@ -580,111 +557,106 @@ const UserDashboard = () => {
                     今すぐ予約する
                   </button>
                 )}
-                {bookings.length > 0 && (
-                  <button 
-                    className="secondary-btn"
-                    onClick={() => {
-                      setSearchQuery('');
-                      setFilterStatus('all');
-                      setSortBy('newest');
-                    }}
-                  >
-                    フィルタをリセット
-                  </button>
-                )}
               </div>
             ) : (
               <div className="bookings-list">
                 {filteredBookings.map((booking) => {
-                  const stayDetails = calculateStayDetails(
-                    booking.check_in_date, 
-                    booking.check_out_date
-                  );
-                  const periodStatus = getBookingPeriodStatus(
-                    booking.check_in_date, 
-                    booking.check_out_date
-                  );
-                  
-                  return (
-                    <div key={booking.id} className={`booking-card enhanced-card ${periodStatus.class}`}>
-                      {/* 🎯 Phase 3.2 改善: 美しいカードヘッダー */}
-                      <div className="booking-header">
-                        <div className="booking-dates">
-                          <div className="date-range">
-                            <h3>
-                              📅 {formatDate(booking.check_in_date, true)} 
-                              <span className="date-separator">〜</span>
-                              {formatDate(booking.check_out_date, true)}
-                            </h3>
-                            <div className="stay-duration">
-                              🌙 <strong>{stayDetails.nights}泊</strong>
-                              <span className="period-badge {periodStatus.class}">
-                                {periodStatus.label}
-                              </span>
+                  // 🔒 プライバシー保護機能ON/OFF
+                  if (privacyProtectionEnabled) {
+                    return (
+                      <PrivacyProtectedBookingCard 
+                        key={booking.id} 
+                        booking={booking}
+                      />
+                    );
+                  } else {
+                    // 従来の詳細表示（開発・管理者向け）
+                    const stayDetails = calculateStayDetails(
+                      booking.check_in_date, 
+                      booking.check_out_date
+                    );
+                    const periodStatus = getBookingPeriodStatus(
+                      booking.check_in_date, 
+                      booking.check_out_date
+                    );
+                    
+                    return (
+                      <div key={booking.id} className={`booking-card enhanced-card ${periodStatus.class}`}>
+                        <div className="booking-header">
+                          <div className="booking-dates">
+                            <div className="date-range">
+                              <h3>
+                                📅 {formatDate(booking.check_in_date, true)} 
+                                <span className="date-separator">〜</span>
+                                {formatDate(booking.check_out_date, true)}
+                              </h3>
+                              <div className="stay-duration">
+                                🌙 <strong>{stayDetails.nights}泊</strong>
+                                <span className={`period-badge ${periodStatus.class}`}>
+                                  {periodStatus.label}
+                                </span>
+                              </div>
                             </div>
                           </div>
+                          {getStatusBadge(booking.status)}
                         </div>
-                        {getStatusBadge(booking.status)}
-                      </div>
-                      
-                      {/* 🎯 Phase 3.2 改善: 詳細な情報表示 */}
-                      <div className="booking-details enhanced-details">
-                        <div className="booking-main-info">
-                          <div className="room-info">
-                            <h4>🏨 {getRoomDisplayName(booking)}</h4>
-                            <p>👥 ゲスト数: <strong>{booking.total_guests || booking.number_of_guests || 0}名</strong></p>
+                        
+                        <div className="booking-details enhanced-details">
+                          <div className="booking-main-info">
+                            <div className="room-info">
+                              <h4>🏨 {getRoomDisplayName(booking)}</h4>
+                              <p>📍 {getLocationDisplay(booking)}</p>
+                              <p>👥 ゲスト数: <strong>{booking.total_guests}名</strong></p>
+                            </div>
+                            
+                            <div className="pricing-info">
+                              <div className="total-amount">
+                                💰 総額: <strong>₹{booking.total_amount?.toLocaleString()}</strong>
+                              </div>
+                              <div className="nights-info">
+                                🌙 {stayDetails.nights}泊の宿泊
+                              </div>
+                            </div>
                           </div>
                           
-                          {/* 🎯 Phase 3.2 改善: 保存データをそのまま表示する料金表示 */}
-                          <div className="pricing-info">
-                            <div className="total-amount">
-                              💰 総額: <strong>₹{booking.total_amount?.toLocaleString()}</strong>
+                          <div className="booking-meta-info">
+                            <div className="booking-id-info">
+                              <p><strong>📋 予約ID:</strong> <code>{booking.id}</code></p>
+                              <p><strong>📅 予約日時:</strong> {formatDate(booking.created_at)}</p>
+                              {/* 🔧 開発者向け詳細情報 */}
+                              {booking.rooms && (
+                                <p><strong>🏠 部屋詳細:</strong> {booking.rooms.map(room => `${room.room_id}`).join(', ')}</p>
+                              )}
                             </div>
-                            <div className="nights-info">
-                              🌙 {stayDetails.nights}泊の宿泊
-                            </div>
-                            {booking.room_amount && booking.room_amount !== booking.total_amount && (
-                              <div className="room-amount-info">
-                                🏠 部屋料金: ₹{booking.room_amount?.toLocaleString()}
-                              </div>
-                            )}
                           </div>
                         </div>
                         
-                        <div className="booking-meta-info">
-                          <div className="booking-id-info">
-                            <p><strong>📋 予約ID:</strong> <code>{booking.id}</code></p>
-                            <p><strong>📅 予約日時:</strong> {formatDate(booking.created_at)}</p>
-                          </div>
+                        <div className="booking-actions enhanced-actions">
+                          <button 
+                            className="secondary-btn rebook-btn"
+                            onClick={() => handleRebook(booking)}
+                            title="同じ条件で新しい予約を作成"
+                          >
+                            🔄 同条件で再予約
+                          </button>
+                          <button 
+                            className="outline-btn details-btn"
+                            title="予約の詳細情報を表示"
+                          >
+                            📋 詳細を見る
+                          </button>
+                          {booking.status === 'confirmed' && periodStatus.status === 'future' && (
+                            <button 
+                              className="danger-btn cancel-btn"
+                              title="予約をキャンセル"
+                            >
+                              ❌ キャンセル
+                            </button>
+                          )}
                         </div>
                       </div>
-                      
-                      {/* 🎯 Phase 3.2 改善: アクションボタン */}
-                      <div className="booking-actions enhanced-actions">
-                        <button 
-                          className="secondary-btn rebook-btn"
-                          onClick={() => handleRebook(booking)}
-                          title="同じ条件で新しい予約を作成"
-                        >
-                          🔄 同条件で再予約
-                        </button>
-                        <button 
-                          className="outline-btn details-btn"
-                          title="予約の詳細情報を表示"
-                        >
-                          📋 詳細を見る
-                        </button>
-                        {booking.status === 'confirmed' && periodStatus.status === 'future' && (
-                          <button 
-                            className="danger-btn cancel-btn"
-                            title="予約をキャンセル"
-                          >
-                            ❌ キャンセル
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  );
+                    );
+                  }
                 })}
               </div>
             )}
@@ -695,8 +667,8 @@ const UserDashboard = () => {
         {activeTab === 'profile' && (
           <div className="profile-section">
             <div className="section-header">
-              <h2>プロフィール設定</h2>
-              <p>新IDフォーマット対応プロフィール</p>
+              <h2>👤 プロフィール設定</h2>
+              <p>Phase 3.2 新IDフォーマット対応</p>
             </div>
             
             <div className="profile-form">
@@ -773,7 +745,7 @@ const UserDashboard = () => {
         {activeTab === 'favorites' && (
           <div className="favorites-section">
             <div className="section-header">
-              <h2>お気に入り</h2>
+              <h2>⭐ お気に入り</h2>
               <p>よく利用する部屋や設定を保存できます</p>
             </div>
             
@@ -790,6 +762,20 @@ const UserDashboard = () => {
             </div>
           </div>
         )}
+      </div>
+
+      {/* フッター */}
+      <div className="dashboard-footer">
+        <div className="footer-content">
+          <p className="footer-text">
+            サンタナゲストハウス予約システム | Phase 3.2 プライバシー保護機能搭載
+          </p>
+          <div className="footer-links">
+            <a href="/privacy" className="footer-link">プライバシーポリシー</a>
+            <a href="/support" className="footer-link">サポート</a>
+            <a href="/contact" className="footer-link">お問い合わせ</a>
+          </div>
+        </div>
       </div>
     </div>
   );
