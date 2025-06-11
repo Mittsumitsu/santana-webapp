@@ -1,4 +1,4 @@
-// backend/index.js - ユーザールート追加版（完全版）
+// backend/index.js - 管理者API追加版（完全版）
 const express = require('express');
 const cors = require('cors');
 const admin = require('firebase-admin');
@@ -56,7 +56,8 @@ app.get('/', (req, res) => {
       'Room Management',
       'Booking System', 
       'User Profiles',
-      'Auto-fill Forms'
+      'Auto-fill Forms',
+      'Admin Dashboard'
     ]
   });
 });
@@ -81,6 +82,118 @@ app.use('/api/rooms', dbMiddleware, roomRoutes);
 app.use('/api/bookings', dbMiddleware, bookingRoutes);
 // 🆕 新機能: ユーザー関連API追加
 app.use('/api/users', dbMiddleware, userRoutes);
+
+// 🛠️ 管理者専用API（一時実装）
+app.get('/api/admin/bookings', dbMiddleware, async (req, res) => {
+  try {
+    console.log('🛠️ 管理者: 予約一覧取得');
+    
+    // 全予約を取得（管理者なので全情報表示）
+    const bookingsSnapshot = await req.db.collection('bookings').get();
+    const bookings = [];
+    
+    bookingsSnapshot.forEach(doc => {
+      bookings.push({
+        id: doc.id,
+        ...doc.data()
+      });
+    });
+    
+    console.log(`✅ 管理者: ${bookings.length}件の予約を取得`);
+    res.json(bookings);
+    
+  } catch (error) {
+    console.error('❌ 管理者予約取得エラー:', error);
+    res.status(500).json({ 
+      error: '予約データの取得に失敗しました',
+      message: error.message 
+    });
+  }
+});
+
+app.get('/api/admin/rooms', dbMiddleware, async (req, res) => {
+  try {
+    console.log('🛠️ 管理者: 部屋一覧取得');
+    
+    // 全部屋情報を取得（管理者なので部屋番号等も含む）
+    const roomsSnapshot = await req.db.collection('rooms').get();
+    const rooms = [];
+    
+    roomsSnapshot.forEach(doc => {
+      rooms.push({
+        id: doc.id,
+        ...doc.data()
+      });
+    });
+    
+    console.log(`✅ 管理者: ${rooms.length}件の部屋を取得`);
+    res.json(rooms);
+    
+  } catch (error) {
+    console.error('❌ 管理者部屋取得エラー:', error);
+    res.status(500).json({ 
+      error: '部屋データの取得に失敗しました',
+      message: error.message 
+    });
+  }
+});
+
+app.get('/api/admin/room-allocations', dbMiddleware, async (req, res) => {
+  try {
+    console.log('🛠️ 管理者: 部屋割り当て一覧取得');
+    
+    // 部屋割り当て情報を取得
+    const allocationsSnapshot = await req.db.collection('room_allocations').get();
+    const allocations = [];
+    
+    allocationsSnapshot.forEach(doc => {
+      allocations.push({
+        id: doc.id,
+        ...doc.data()
+      });
+    });
+    
+    console.log(`✅ 管理者: ${allocations.length}件の割り当てを取得`);
+    res.json(allocations);
+    
+  } catch (error) {
+    console.error('❌ 管理者割り当て取得エラー:', error);
+    res.status(500).json({ 
+      error: '割り当てデータの取得に失敗しました',
+      message: error.message 
+    });
+  }
+});
+
+// 🔍 管理者用全ユーザー取得
+app.get('/api/admin/users', dbMiddleware, async (req, res) => {
+  try {
+    console.log('🛠️ 管理者: 全ユーザー一覧取得');
+    
+    const usersSnapshot = await req.db.collection('users').get();
+    const users = [];
+    
+    usersSnapshot.forEach(doc => {
+      const userData = doc.data();
+      // 管理者には全情報を表示（パスワード等は除く）
+      const { password, private_key, ...safeUserData } = userData;
+      users.push({
+        id: doc.id,
+        ...safeUserData
+      });
+    });
+    
+    console.log(`✅ 管理者: ${users.length}人のユーザーを取得`);
+    res.json(users);
+    
+  } catch (error) {
+    console.error('❌ 管理者ユーザー取得エラー:', error);
+    res.status(500).json({ 
+      error: 'ユーザーデータの取得に失敗しました',
+      message: error.message 
+    });
+  }
+});
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -128,6 +241,12 @@ app.get('/api', (req, res) => {
         'PUT /api/users/:userId/profiles/:profileId': 'プロフィール更新',
         'DELETE /api/users/:userId/profiles/:profileId': 'プロフィール削除',
         'POST /api/users/:userId/profiles/:profileId/default': 'デフォルトプロフィール設定'
+      },
+      admin: {
+        'GET /api/admin/bookings': '管理者: 全予約一覧',
+        'GET /api/admin/rooms': '管理者: 全部屋一覧',
+        'GET /api/admin/room-allocations': '管理者: 部屋割り当て一覧',
+        'GET /api/admin/users': '管理者: 全ユーザー一覧'
       }
     },
     authentication: 'Firebase Auth',
@@ -147,7 +266,11 @@ app.use('*', (req, res) => {
       'GET /api',
       'GET /api/rooms',
       'GET /api/bookings',
-      'GET /api/users/:userId'
+      'GET /api/users/:userId',
+      'GET /api/admin/bookings',
+      'GET /api/admin/rooms',
+      'GET /api/admin/room-allocations',
+      'GET /api/admin/users'
     ]
   });
 });
@@ -220,7 +343,13 @@ const server = app.listen(port, () => {
   console.log(`   PUT    /api/users/:userId/profiles/:profileId`);
   console.log(`   DELETE /api/users/:userId/profiles/:profileId`);
   console.log(`   POST   /api/users/:userId/profiles/:profileId/default`);
+  console.log(`🛠️ 管理者用APIエンドポイント:`);
+  console.log(`   GET    /api/admin/bookings - 全予約一覧`);
+  console.log(`   GET    /api/admin/rooms - 全部屋一覧`);  
+  console.log(`   GET    /api/admin/room-allocations - 部屋割り当て一覧`);
+  console.log(`   GET    /api/admin/users - 全ユーザー一覧`);
   console.log(`📋 システム準備完了 - プロフィール自動入力機能有効`);
+  console.log(`🛠️ 管理者ダッシュボード機能有効`);
 });
 
 // Export for use in routes

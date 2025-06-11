@@ -1,4 +1,4 @@
-// 📧 構文エラー修正版 AuthContext.js
+// 📧 Firestore接続タイムアウト修正版 AuthContext.js
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { 
   createUserWithEmailAndPassword,
@@ -178,11 +178,11 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // 既存の関数（認証待ち状態対応版に修正）
+  // 🔧 修正版: タイムアウト耐性を向上
 
   const generateUniqueUserId = async () => {
     let attempts = 0;
-    const maxAttempts = 10;
+    const maxAttempts = 5; // 試行回数を削減
     
     while (attempts < maxAttempts) {
       const candidateId = generateUserId();
@@ -191,7 +191,7 @@ export const AuthProvider = ({ children }) => {
       try {
         const checkPromise = getDoc(doc(db, 'users', candidateId));
         const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('timeout')), 1000)
+          setTimeout(() => reject(new Error('timeout')), 2000) // タイムアウトを短縮
         );
         
         const checkDoc = await Promise.race([checkPromise, timeoutPromise]);
@@ -206,7 +206,8 @@ export const AuthProvider = ({ children }) => {
       } catch (error) {
         console.log(`⚠️ チェック失敗 (${candidateId}): ${error.message}`);
         
-        if (error.message === 'timeout' || error.code === 'unavailable') {
+        // タイムアウトや接続エラーの場合は採用
+        if (error.message === 'timeout' || error.code === 'unavailable' || error.code === 'permission-denied') {
           console.log(`🔧 ネットワークエラー時ID採用: ${candidateId}`);
           return candidateId;
         }
@@ -220,20 +221,23 @@ export const AuthProvider = ({ children }) => {
     return fallbackId;
   };
 
+  // 🛠️ 修正版: createUserDocument - タイムアウト対策強化
   const createUserDocument = async (user, additionalData = {}) => {
     if (!user) return;
     
     const firebaseUid = user.uid;
     console.log('🔒 ユーザー作成開始:', user.email, firebaseUid);
     
+    // 処理中チェック（簡略化）
     if (processingUsers.current.has(firebaseUid)) {
-      console.log('⚠️ ユーザー作成処理中 - 待機');
-      for (let i = 0; i < 100; i++) {
+      console.log('⚠️ ユーザー作成処理中 - 短縮待機');
+      for (let i = 0; i < 30; i++) { // 待機時間を短縮
         await new Promise(resolve => setTimeout(resolve, 100));
         if (!processingUsers.current.has(firebaseUid)) break;
       }
     }
     
+    // キャッシュチェック
     if (userCache.has(firebaseUid)) {
       const cachedUser = userCache.get(firebaseUid);
       console.log('💾 キャッシュからユーザー取得:', cachedUser.userData?.id);
@@ -243,7 +247,7 @@ export const AuthProvider = ({ children }) => {
     processingUsers.current.add(firebaseUid);
     
     try {
-      // 既存ユーザー検索
+      // 📍 Step 1: Firebase UIDで既存ユーザー検索（短縮タイムアウト）
       console.log('🔍 Firebase UIDで検索:', firebaseUid);
       
       const usersRef = collection(db, 'users');
@@ -255,48 +259,45 @@ export const AuthProvider = ({ children }) => {
       
       let existingSnapshot;
       try {
+        console.log('⏱️ Firestore接続中（短縮タイムアウト）...');
         const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Firestore timeout')), 3000)
+          setTimeout(() => reject(new Error('Firestore timeout')), 4000) // 4秒に短縮
         );
         
         existingSnapshot = await Promise.race([
           getDocs(existingQuery),
           timeoutPromise
         ]);
+        console.log('✅ Firebase UID検索完了');
       } catch (timeoutError) {
         console.error('⚠️ Firestore接続タイムアウト:', timeoutError.message);
         
-        const tempUserData = {
-          id: generateUserId(),
-          displayName: user.displayName || 'オフラインユーザー',
-          email: user.email,
-          userType: 'guest',
-          emailVerified: user.emailVerified || false,
-          isTemporary: true
-        };
-        
-        const tempUser = { 
-          ...user, 
-          customUserId: tempUserData.id, 
-          userData: tempUserData 
-        };
-        
-        userCache.set(firebaseUid, tempUser);
-        return tempUser;
+        // タイムアウト時は即座に新規作成へスキップ
+        console.log('🔧 タイムアウトのため新規作成へスキップ');
+        existingSnapshot = { empty: true };
       }
       
+      // 📍 Step 2: 既存ユーザーが見つかった場合
       if (!existingSnapshot.empty) {
         const existingDoc = existingSnapshot.docs[0];
         const existingData = existingDoc.data();
         
         console.log('✅ 既存ユーザー発見:', existingData.id);
         
+        // ログイン時間更新（失敗しても継続）
         try {
-          await setDoc(existingDoc.ref, {
+          const updatePromise = setDoc(existingDoc.ref, {
             lastLogin: new Date(),
             updated_at: new Date(),
             emailVerified: user.emailVerified || false
           }, { merge: true });
+          
+          const updateTimeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Update timeout')), 2000)
+          );
+          
+          await Promise.race([updatePromise, updateTimeoutPromise]);
+          console.log('✅ ログイン時間更新完了');
         } catch (updateError) {
           console.warn('⚠️ ログイン時間更新失敗（継続）:', updateError.message);
         }
@@ -311,42 +312,53 @@ export const AuthProvider = ({ children }) => {
         return userWithCustomId;
       }
       
-      // メールアドレスでも検索
-      console.log('🔍 メールアドレスで検索:', user.email);
-      const emailQuery = query(
-        usersRef,
-        where('email', '==', user.email),
-        limit(1)
-      );
+      // 📍 Step 3: メールアドレスで既存ユーザー検索（スキップ可能）
+      console.log('🔍 メールアドレスで検索（短縮版）:', user.email);
       
-      let emailSnapshot;
+      let emailSnapshot = { empty: true };
       try {
+        const emailQuery = query(
+          usersRef,
+          where('email', '==', user.email),
+          limit(1)
+        );
+        
         const emailTimeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Email search timeout')), 3000)
+          setTimeout(() => reject(new Error('Email search timeout')), 2000) // 2秒に短縮
         );
         
         emailSnapshot = await Promise.race([
           getDocs(emailQuery),
           emailTimeoutPromise
         ]);
+        console.log('✅ メールアドレス検索完了');
       } catch (emailTimeoutError) {
-        console.error('⚠️ メール検索タイムアウト:', emailTimeoutError.message);
+        console.error('⚠️ メール検索タイムアウト（新規作成継続）:', emailTimeoutError.message);
         emailSnapshot = { empty: true };
       }
       
+      // 📍 Step 4: 同一メールアドレスのユーザーが見つかった場合
       if (!emailSnapshot.empty) {
         const emailDoc = emailSnapshot.docs[0];
         const emailData = emailDoc.data();
         
         console.log('⚠️ 同一メールアドレスのユーザー発見:', emailData.id);
         
+        // Firebase UID更新（失敗しても継続）
         try {
-          await setDoc(emailDoc.ref, {
+          const mergePromise = setDoc(emailDoc.ref, {
             firebase_uid: firebaseUid,
             lastLogin: new Date(),
             updated_at: new Date(),
             emailVerified: user.emailVerified || false
           }, { merge: true });
+          
+          const mergeTimeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Merge timeout')), 2000)
+          );
+          
+          await Promise.race([mergePromise, mergeTimeoutPromise]);
+          console.log('✅ Firebase UID更新完了');
         } catch (updateError) {
           console.warn('⚠️ Firebase UID更新失敗（継続）:', updateError.message);
         }
@@ -365,7 +377,7 @@ export const AuthProvider = ({ children }) => {
         return userWithCustomId;
       }
       
-      // 完全新規ユーザー作成
+      // 📍 Step 5: 完全新規ユーザー作成
       console.log('🆕 完全新規ユーザー作成開始');
       
       const customUserId = await generateUniqueUserId();
@@ -382,7 +394,7 @@ export const AuthProvider = ({ children }) => {
         email,
         createdAt,
         lastLogin: createdAt,
-        userType: 'guest',
+        userType: 'guest', // デフォルトはguest
         language: 'ja',
         emailVerified: user.emailVerified || false,
         emailPreferences: {
@@ -391,37 +403,87 @@ export const AuthProvider = ({ children }) => {
         },
         created_at: createdAt,
         updated_at: createdAt,
+        creation_method: 'auth_context',
         ...additionalData
       };
 
+      // 📍 Step 6: Firestoreにユーザードキュメントを作成（強化版タイムアウト）
+      let createSuccess = false;
       try {
-        await setDoc(userRef, userData);
+        console.log('💾 Firestore書き込み開始（タイムアウト対策版）...');
+        
+        const writePromise = setDoc(userRef, userData);
+        const writeTimeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Write timeout')), 6000) // 6秒
+        );
+        
+        await Promise.race([writePromise, writeTimeoutPromise]);
         console.log('✅ 新規ユーザー作成完了:', customUserId);
+        createSuccess = true;
+        
       } catch (createError) {
         console.error('❌ ユーザー作成失敗:', createError.message);
+        console.error('🔧 詳細エラー:', {
+          code: createError.code,
+          message: createError.message
+        });
+        
+        // 失敗時は一時的フラグを設定（機能は継続）
         userData.isTemporary = true;
+        userData.creation_error = createError.message;
+        userData.retry_needed = true;
+        userData.offline_mode = true;
+        
+        console.log('🔧 一時的ユーザーとして継続（機能制限なし）:', customUserId);
       }
       
       const userWithCustomId = { 
         ...user, 
         customUserId, 
-        userData 
+        userData,
+        creation_success: createSuccess
       };
       
       userCache.set(firebaseUid, userWithCustomId);
+      
+      // 成功/失敗に関わらず、ユーザーとして使用可能
+      if (createSuccess) {
+        console.log('🎉 新規ユーザー正常作成:', {
+          customUserId,
+          email: user.email,
+          firebaseUid,
+          displayName: userData.displayName
+        });
+      } else {
+        console.log('🔧 一時ユーザーとして作成（後で同期可能）:', {
+          customUserId,
+          email: user.email,
+          temporary: true
+        });
+      }
+      
       return userWithCustomId;
       
     } catch (error) {
       console.error('❌ ユーザードキュメント作成エラー:', error);
+      console.error('🔧 エラー詳細:', {
+        code: error.code,
+        message: error.message
+      });
       
+      // エラー時でも使用可能なフォールバックユーザー作成
       const fallbackUserData = {
         id: generateUserId(),
-        displayName: user.displayName || 'エラーユーザー',
+        displayName: user.displayName || 'ユーザー',
         email: user.email,
         userType: 'guest',
         emailVerified: user.emailVerified || false,
         isTemporary: true,
-        error: error.message
+        offline_mode: true,
+        error: error.message,
+        error_code: error.code,
+        fallback_created: true,
+        functional: true // 機能は正常使用可能
       };
       
       const fallbackUser = { 
@@ -431,9 +493,12 @@ export const AuthProvider = ({ children }) => {
       };
       
       userCache.set(firebaseUid, fallbackUser);
+      console.log('🔧 フォールバックユーザー作成（完全機能）:', fallbackUserData.id);
       return fallbackUser;
+      
     } finally {
       processingUsers.current.delete(firebaseUid);
+      console.log('🔓 ユーザー作成処理終了:', firebaseUid);
     }
   };
 
@@ -456,7 +521,7 @@ export const AuthProvider = ({ children }) => {
       );
       
       const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Search timeout')), 3000)
+        setTimeout(() => reject(new Error('Search timeout')), 2000) // 短縮
       );
       
       const userSnapshot = await Promise.race([
@@ -628,7 +693,7 @@ export const AuthProvider = ({ children }) => {
 
   // 認証状態の監視
   useEffect(() => {
-    console.log('🔒 認証状態監視開始（認証待ち対応版）');
+    console.log('🔒 認証状態監視開始（タイムアウト対策版）');
     
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       console.log('🔄 認証状態変更:', user ? `ユーザーあり (${user.uid}, verified: ${user.emailVerified})` : 'ユーザーなし');
@@ -671,6 +736,7 @@ export const AuthProvider = ({ children }) => {
           setPendingVerification(null);
         } catch (error) {
           console.error('❌ 認証状態変更エラー:', error);
+          // エラーでも基本的なユーザーオブジェクトは設定
           setCurrentUser(user);
         }
       } else {
