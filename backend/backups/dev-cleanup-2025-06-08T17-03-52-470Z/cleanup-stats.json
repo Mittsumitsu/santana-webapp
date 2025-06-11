@@ -1,0 +1,15 @@
+{
+  "protected": {
+    "users": 1,
+    "rooms": 29,
+    "locations": 0,
+    "room_types": 0
+  },
+  "deleted": {
+    "bookings": 0,
+    "old_bookings": 0,
+    "availability": 0,
+    "temp_data": 0
+  },
+  "total_operations": 0
+}

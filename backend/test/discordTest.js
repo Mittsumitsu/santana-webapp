@@ -1,10 +1,32 @@
-// Discord Webhook テスト実行
-// backend/test/discordTest.js - 新規作成
+// Discord Webhook テスト実行 - セキュア版
+// backend/test/discordTest.js
 
 const axios = require('axios');
+const dotenv = require('dotenv');
 
-// テスト用のWebhookURL（実際のURLを使用）
-const WEBHOOK_URL = 'https://discord.com/api/webhooks/1379114621067067516/036_I6T-aPL0GLVDk7inLT9b74JhRSdSxMRHeMuMaAYPQMe0p-oCHWg-x9mngiU48vuc';
+// 環境変数を読み込み
+dotenv.config();
+
+// 🔒 環境変数からWebhookURLを取得（セキュア）
+const WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
+
+// セキュリティチェック
+if (!WEBHOOK_URL) {
+  console.error('❌ DISCORD_WEBHOOK_URL environment variable not set!');
+  console.error('🔧 .envファイルに以下を追加してください:');
+  console.error('   DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/YOUR_WEBHOOK_ID/YOUR_WEBHOOK_TOKEN');
+  process.exit(1);
+}
+
+// WebhookURLの形式チェック
+if (!WEBHOOK_URL.startsWith('https://discord.com/api/webhooks/')) {
+  console.error('❌ Invalid Discord Webhook URL format!');
+  console.error('🔧 正しい形式: https://discord.com/api/webhooks/ID/TOKEN');
+  process.exit(1);
+}
+
+console.log('🔒 Webhook URL loaded from environment variables');
+console.log('🔗 URL format: ****/webhooks/****/****');
 
 // 1. 基本的なテストメッセージ
 async function testBasicMessage() {
@@ -248,7 +270,7 @@ async function testMaintenanceAlert() {
 // すべてのテストを実行
 async function runAllTests() {
   console.log('🚀 Discord Webhook テスト開始');
-  console.log('📍 Webhook URL:', WEBHOOK_URL);
+  console.log('🔒 セキュア版（環境変数使用）');
   console.log('=====================================\n');
   
   const results = [];
@@ -302,13 +324,23 @@ module.exports = {
 };
 
 // ==============================================
-// 実行方法:
+// セキュア使用方法:
 // 
-// 1. ファイルを backend/test/discordTest.js として保存
-// 2. ターミナルで以下を実行:
+// 1. backend/.env ファイルに以下を追加:
+//    DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/YOUR_WEBHOOK_ID/YOUR_WEBHOOK_TOKEN
+// 
+// 2. ファイルを backend/test/discordTest.js として保存
+// 
+// 3. ターミナルで以下を実行:
 //    cd backend
 //    node test/discordTest.js
 // 
-// 3. Discordの #開発テスト通知 チャンネルで
-//    6種類の通知が順次表示されることを確認
+// 4. .gitignore に .env が含まれていることを確認
+//    （WebhookURLが公開されないように）
+// 
+// 🔒 セキュリティ対策:
+// - WebhookURLをハードコーディングしない
+// - 環境変数(.env)で管理
+// - .gitignoreで.envを除外
+// - URL形式の検証
 // ==============================================

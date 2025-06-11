@@ -1,0 +1,205 @@
+{
+  "bookings": [
+    {
+      "id": "B_2T7G5SXKL5JQ",
+      "data": {
+        "id": "B_2T7G5SXKL5JQ",
+        "user_id": "U_B9Z3BRJN",
+        "check_in_date": "2025-06-09",
+        "check_out_date": "2025-06-11",
+        "status": "confirmed",
+        "total_guests": 4,
+        "primary_contact": {
+          "name_kanji": "テスト 太郎",
+          "name_romaji": "TEST TARO",
+          "email": "oo00mixan00oo@icloud.com",
+          "gender": "male"
+        },
+        "total_amount": 3400,
+        "rooms": [
+          {
+            "room_id": "delhi-202",
+            "check_in_time": "14:00",
+            "number_of_guests": 2,
+            "primary_guest": {
+              "name_romaji": "TEST TARO",
+              "gender": "male"
+            },
+            "additional_guests": [
+              {
+                "name_romaji": "TEST JIRO",
+                "gender": "male"
+              }
+            ],
+            "room_amount": 1700
+          },
+          {
+            "room_id": "delhi-301",
+            "check_in_time": "14:00",
+            "number_of_guests": 2,
+            "primary_guest": {
+              "name_romaji": "TEST HANAKO",
+              "gender": "female"
+            },
+            "additional_guests": [
+              {
+                "name_romaji": "TEST HONIKO",
+                "gender": "female"
+              }
+            ],
+            "room_amount": 1700
+          }
+        ],
+        "created_by": "U_B9Z3BRJN",
+        "system_version": "2.0_NEW_ID_SYSTEM",
+        "booking_type": "unified_booking",
+        "updated_at": {
+          "_seconds": 1749381350,
+          "_nanoseconds": 826000000
+        },
+        "created_at": {
+          "_seconds": 1749381350,
+          "_nanoseconds": 826000000
+        }
+      }
+    }
+  ],
+  "booking_validations": [
+    {
+      "id": "4gv2pWUbcOK8QPOEaTjp",
+      "data": {
+        "id": "4gv2pWUbcOK8QPOEaTjp",
+        "booking_id": "6cW1AB5Q5ljkKkYN9WRZ",
+        "validation_type": "gender_restriction",
+        "status": "passed",
+        "details": "正常に検証されました",
+        "created_at": {
+          "_seconds": 1748783758,
+          "_nanoseconds": 468000000
+        }
+      }
+    },
+    {
+      "id": "5pXrJQFzyBmABMtDQRXJ",
+      "data": {
+        "id": "5pXrJQFzyBmABMtDQRXJ",
+        "booking_id": "QHgsKXd3lYDIIJTYU06i",
+        "validation_type": "gender_restriction",
+        "status": "passed",
+        "details": "男性専用ドミトリーの予約は正常に検証されました",
+        "created_at": {
+          "_seconds": 1748783113,
+          "_nanoseconds": 906000000
+        }
+      }
+    },
+    {
+      "id": "TlZMKZQ6bwQTi5oqeitH",
+      "data": {
+        "id": "TlZMKZQ6bwQTi5oqeitH",
+        "booking_id": "KygJ7twManzwAuElO9Xq",
+        "validation_type": "gender_restriction",
+        "status": "passed",
+        "details": "正常に検証されました",
+        "created_at": {
+          "_seconds": 1748934140,
+          "_nanoseconds": 514000000
+        }
+      }
+    },
+    {
+      "id": "val12345",
+      "data": {
+        "id": "val12345",
+        "booking_id": "rsv_child1",
+        "validation_type": "gender_restriction",
+        "status": "passed",
+        "details": "女性専用ドミトリーの予約は女性ゲストのみで構成されています",
+        "created_at": "2025-05-07T10:29:55.000Z"
+      }
+    }
+  ],
+  "custom_services": [
+    {
+      "id": "cust_srv1a2b3c4d",
+      "data": {
+        "id": "cust_srv1a2b3c4d",
+        "parent_booking_id": "parent_rsva7f8d9e2",
+        "booking_id": "rsv_child1",
+        "category_id": "meal",
+        "name": "特別リクエスト（カレー）",
+        "name_en": "Special Request (Curry)",
+        "description": "スパイスを抑えた日本人向けカレー",
+        "price": 400,
+        "currency": "INR",
+        "created_by": "staff8g9h0i1j2k",
+        "created_at": "2025-05-11T14:00:00.000Z",
+        "updated_at": "2025-05-11T14:00:00.000Z"
+      }
+    }
+  ],
+  "guest_charges": [
+    {
+      "id": "chg1a2b3c4d5e",
+      "data": {
+        "id": "chg1a2b3c4d5e",
+        "parent_booking_id": "parent_rsva7f8d9e2",
+        "booking_id": "rsv_child1",
+        "service_id": "water_bottle",
+        "custom_service_id": null,
+        "quantity": 2,
+        "unit_price": 50,
+        "amount": 100,
+        "charged_date": "2025-05-11T15:30:00.000Z",
+        "status": "pending",
+        "charged_by": "staff8g9h0i1j2k",
+        "created_at": "2025-05-11T15:30:00.000Z",
+        "updated_at": "2025-05-11T15:30:00.000Z"
+      }
+    }
+  ],
+  "payments": [
+    {
+      "id": "pmt1d2e3f4a",
+      "data": {
+        "id": "pmt1d2e3f4a",
+        "parent_booking_id": "parent_rsva7f8d9e2",
+        "amount": 3500,
+        "currency": "INR",
+        "status": "paid",
+        "payment_method": "bank_transfer",
+        "payment_date": "2025-05-07T10:35:00.000Z",
+        "transaction_id": "txn12345678",
+        "receipt_number": "R20250507001",
+        "created_at": "2025-05-07T10:35:00.000Z",
+        "updated_at": "2025-05-07T10:35:00.000Z"
+      }
+    }
+  ],
+  "transportation_bookings": [
+    {
+      "id": "trns1a2b3c4d5e",
+      "data": {
+        "id": "trns1a2b3c4d5e",
+        "parent_booking_id": "parent_rsva7f8d9e2",
+        "service_id": "airport_pickup",
+        "status": "confirmed",
+        "pickup_date": "2025-05-10",
+        "pickup_time": "10:00 AM",
+        "flight_number": "JL039",
+        "guest": {
+          "name_kanji": "田中 太郎",
+          "name_romaji": "Tanaka Taro",
+          "gender": "male"
+        },
+        "amount": 1000,
+        "currency": "INR",
+        "payment_id": "pmt1d2e3f4a",
+        "created_at": "2025-05-01T10:00:00.000Z",
+        "updated_at": "2025-05-01T10:00:00.000Z",
+        "completed_at": null,
+        "completed_by": null
+      }
+    }
+  ]
+}
