@@ -1,4 +1,4 @@
-// frontend/src/pages/Home.js - 空室検索結果表示修正版
+// frontend/src/pages/Home.js - 重複ヘッダー削除版
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SearchForm from '../components/SearchForm';
@@ -149,32 +149,18 @@ const Home = () => {
           </div>
         )}
 
-        {/* 🔥 修正：検索結果の表示ロジック */}
+        {/* 🔥 修正：検索結果の表示ロジック（ヘッダー重複削除） */}
         {searchPerformed && !loading && !error && (
           <div className="search-results-container">
             {combinations.length > 0 ? (
-              <>
-                <div className="results-header">
-                  <h2>空室検索結果</h2>
-                  <p className="results-count">
-                    {combinations.length}つの宿泊プランが見つかりました
-                  </p>
-                  {currentSearchParams && (
-                    <div className="search-summary">
-                      <span>📅 {currentSearchParams.checkIn} 〜 {currentSearchParams.checkOut}</span>
-                      <span>👥 {currentSearchParams.totalGuests}名</span>
-                      <span>📍 {currentSearchParams.location}店</span>
-                    </div>
-                  )}
-                </div>
-                
-                {/* 🔥 組み合わせ表示コンポーネント */}
-                <RoomCombinations 
-                  combinations={combinations}
-                  onSelect={handleBooking}
-                  searchParams={currentSearchParams}
-                />
-              </>
+              // 🔥 重複ヘッダーを削除！RoomCombinationsに任せる
+              <RoomCombinations 
+                combinations={combinations}
+                onBooking={handleBooking}
+                searchParams={currentSearchParams}
+                loading={loading}
+                error={error}
+              />
             ) : (
               <div className="no-results-container">
                 <h3>😔 該当する部屋が見つかりませんでした</h3>

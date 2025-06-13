@@ -1,137 +1,120 @@
-/* frontend/src/components/RoomCombinations.css - 検索結果表示スタイル */
+/* RoomCombinations.css - 修正版 */
 
-.room-combinations-container {
+.room-combinations {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.combinations-grid {
+/* 検索結果ヘッダー */
+.results-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 25px;
+  border-radius: 12px;
+  margin-bottom: 25px;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.results-title {
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin: 0 0 10px 0;
+  text-align: center;
+}
+
+.results-count {
+  font-size: 1.1rem;
+  text-align: center;
+  margin-bottom: 15px;
+  opacity: 0.95;
+}
+
+/* 組み合わせリスト */
+.combinations-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 24px;
-  margin-bottom: 32px;
+  gap: 20px;
 }
 
-/* 🔥 組み合わせカード基本スタイル */
+/* 個別の組み合わせカード */
 .combination-card {
   background: white;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  border: 2px solid transparent;
-  transition: all 0.3s ease;
+  border-radius: 12px;
+  border: 2px solid #e2e8f0;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
   overflow: hidden;
-  position: relative;
+  transition: all 0.3s ease;
 }
 
 .combination-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-  border-color: #6366f1;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  border-color: #667eea;
+  transform: translateY(-2px);
 }
 
-.combination-card.recommended {
-  border-color: #10b981;
-  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.15);
-}
-
-/* 🔥 おすすめバッジ */
-.recommendation-badge {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
-  color: white;
-  z-index: 2;
-}
-
-.recommendation-badge.most-recommended {
-  background: linear-gradient(135deg, #10b981, #059669);
-}
-
-.recommendation-badge.cost-effective {
-  background: linear-gradient(135deg, #f59e0b, #d97706);
-}
-
-.recommendation-badge.premium {
-  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-}
-
-/* 🔥 カードヘッダー */
-.card-header {
-  padding: 24px 24px 16px;
+/* ヘッダー部分 */
+.combination-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  padding: 20px 25px 15px;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
 }
 
-.room-type-info {
-  flex: 1;
+.combination-title h3 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin: 0 0 8px 0;
+  line-height: 1.3;
 }
 
-.room-type-title {
-  font-size: 20px;
-  font-weight: 700;
-  color: #1f2937;
-  margin: 0 0 4px 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.combination-type {
+  background: #667eea;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: inline-block;
 }
 
-.room-type-subtitle {
-  font-size: 14px;
-  color: #6b7280;
-  margin: 0;
-}
-
-.pricing-info {
+/* 価格情報 */
+.combination-price {
   text-align: right;
-  margin-left: 16px;
 }
 
-.price-main {
-  font-size: 28px;
-  font-weight: 800;
-  color: #059669;
-  line-height: 1;
+.total-price {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #2d3748;
+  margin-bottom: 5px;
 }
 
-.price-details {
-  font-size: 12px;
-  color: #6b7280;
-  margin-top: 4px;
+.price-per-person {
+  font-size: 0.9rem;
+  color: #4a5568;
+  opacity: 0.8;
 }
 
-/* 🔥 カード本体 */
-.card-body {
-  padding: 0 24px 16px;
-}
-
-.room-details {
-  margin-bottom: 16px;
-}
-
-.room-detail-item {
+/* 部屋詳細 - 修正版 */
+.rooms-detail {
+  padding: 20px 25px;
   display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.room-item {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  padding: 12px 0;
-  border-bottom: 1px solid #f3f4f6;
-}
-
-.room-detail-item:last-child {
-  border-bottom: none;
-}
-
-.room-icon {
-  font-size: 20px;
-  margin-right: 12px;
-  width: 32px;
-  text-align: center;
+  padding: 12px;
+  background: #f7fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
 }
 
 .room-info {
@@ -140,280 +123,164 @@
 
 .room-name {
   font-weight: 600;
-  color: #374151;
-  font-size: 16px;
-}
-
-.room-capacity {
-  font-size: 14px;
-  color: #6b7280;
-  margin-top: 2px;
-}
-
-.gender-restriction {
-  font-size: 12px;
-  color: #8b5cf6;
-  background: #f3e8ff;
-  padding: 2px 8px;
-  border-radius: 12px;
-  display: inline-block;
-  margin-top: 4px;
+  color: #2d3748;
+  font-size: 1rem;
+  display: block;
 }
 
 .room-price {
-  font-weight: 700;
-  color: #059669;
-  font-size: 16px;
-}
-
-/* 🔥 料金詳細 */
-.pricing-breakdown {
-  background: #f9fafb;
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 16px;
-}
-
-.pricing-row {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 8px;
-  font-size: 14px;
-}
-
-.pricing-row:last-child {
-  margin-bottom: 0;
-}
-
-.pricing-row.total {
-  border-top: 1px solid #e5e7eb;
-  padding-top: 8px;
-  margin-top: 8px;
   font-weight: 600;
-  font-size: 16px;
-}
-
-.total-price {
   color: #059669;
-  font-weight: 800;
+  font-size: 1rem;
+  text-align: right;
+  min-width: 100px;
 }
 
-/* 🔥 ゲスト情報 */
-.guest-info {
-  margin-bottom: 16px;
-}
-
-.guest-breakdown {
+/* 特徴表示 */
+.combination-features {
   display: flex;
+  gap: 10px;
+  padding: 15px 25px;
+  background: #f1f5f9;
   flex-wrap: wrap;
+}
+
+.combination-features > div {
+  padding: 6px 12px;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.cost-effective {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+/* アクションボタン */
+.combination-actions {
+  display: flex;
   gap: 12px;
-  align-items: center;
-  font-size: 14px;
-  color: #6b7280;
-}
-
-.total-guests {
-  font-weight: 600;
-  color: #374151;
-}
-
-/* 🔥 カードフッター */
-.card-footer {
-  padding: 16px 24px 24px;
-  border-top: 1px solid #f3f4f6;
-}
-
-.select-button {
-  width: 100%;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
-  color: white;
-  border: none;
-  padding: 14px 24px;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  margin-bottom: 12px;
-}
-
-.select-button:hover {
-  background: linear-gradient(135deg, #5856eb, #7c3aed);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-}
-
-.select-button:active {
-  transform: translateY(0);
-}
-
-.card-features {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.feature-item {
-  font-size: 12px;
-  color: #059669;
-  background: #ecfdf5;
-  padding: 4px 8px;
-  border-radius: 8px;
-}
-
-/* 🔥 検索サマリーフッター */
-.search-summary-footer {
-  text-align: center;
-  padding: 24px;
+  padding: 20px 25px;
   background: #f8fafc;
-  border-radius: 16px;
-  margin-top: 32px;
+  border-top: 1px solid #e2e8f0;
 }
 
-.summary-text {
-  color: #6b7280;
-  font-size: 16px;
-  margin: 0;
+.detail-btn, .book-btn {
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  flex: 1;
 }
 
-.separator {
-  margin: 0 8px;
-  color: #d1d5db;
+.detail-btn {
+  background: #f1f5f9;
+  color: #475569;
+  border: 2px solid #cbd5e1;
 }
 
-/* 🔥 エラー・空状態 */
-.room-combinations-error,
-.room-combinations-empty {
+.detail-btn:hover {
+  background: #e2e8f0;
+  border-color: #94a3b8;
+}
+
+.book-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: 2px solid transparent;
+}
+
+.book-btn:hover {
+  background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+/* フッター */
+.results-footer {
+  margin-top: 30px;
+  padding: 20px;
+  background: #f8fafc;
+  border-radius: 8px;
   text-align: center;
-  padding: 48px 24px;
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
-.room-combinations-error h3,
-.room-combinations-empty h3 {
-  color: #ef4444;
-  margin-bottom: 16px;
-  font-size: 20px;
+.help-text {
+  color: #64748b;
+  font-size: 0.9rem;
 }
 
-.room-combinations-error p,
-.room-combinations-empty p {
-  color: #6b7280;
-  font-size: 16px;
+/* ローディング・エラー・空結果 */
+.loading, .error, .no-results {
+  text-align: center;
+  padding: 60px 20px;
+  font-size: 1.1rem;
+  color: #64748b;
 }
 
-/* 🔥 レスポンシブデザイン */
+.loading {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.error {
+  background: #fee2e2;
+  color: #dc2626;
+  border-radius: 12px;
+  border: 2px solid #fecaca;
+}
+
+.no-results {
+  background: #f0f9ff;
+  color: #0369a1;
+  border-radius: 12px;
+  border: 2px solid #bae6fd;
+}
+
+/* レスポンシブ対応 */
 @media (max-width: 768px) {
-  .room-combinations-container {
-    padding: 16px;
+  .room-combinations {
+    padding: 15px;
   }
-
-  .combinations-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
+  
+  .combination-header {
+    flex-direction: column;
+    gap: 15px;
+    align-items: flex-start;
   }
-
-  .card-header {
+  
+  .combination-price {
+    text-align: left;
+    width: 100%;
+  }
+  
+  .room-item {
     flex-direction: column;
     align-items: flex-start;
-    gap: 12px;
-  }
-
-  .pricing-info {
+    gap: 8px;
     text-align: left;
-    margin-left: 0;
   }
-
-  .room-type-title {
-    font-size: 18px;
+  
+  .room-price {
+    text-align: left;
+    min-width: auto;
   }
-
-  .price-main {
-    font-size: 24px;
+  
+  .combination-actions {
+    flex-direction: column;
   }
-
-  .guest-breakdown {
-    font-size: 13px;
+  
+  .results-title {
+    font-size: 1.5rem;
   }
-
-  .select-button {
-    font-size: 15px;
-    padding: 12px 20px;
+  
+  .total-price {
+    font-size: 1.5rem;
   }
-}
-
-@media (max-width: 480px) {
-  .room-combinations-container {
-    padding: 12px;
-  }
-
-  .card-header,
-  .card-body,
-  .card-footer {
-    padding-left: 16px;
-    padding-right: 16px;
-  }
-
-  .room-detail-item {
-    padding: 8px 0;
-  }
-
-  .room-icon {
-    font-size: 18px;
-    width: 28px;
-  }
-
-  .room-name {
-    font-size: 15px;
-  }
-
-  .pricing-breakdown {
-    padding: 12px;
-  }
-}
-
-/* 🔥 アニメーション */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.combination-card {
-  animation: fadeInUp 0.5s ease-out;
-}
-
-.combination-card:nth-child(1) { animation-delay: 0.1s; }
-.combination-card:nth-child(2) { animation-delay: 0.2s; }
-.combination-card:nth-child(3) { animation-delay: 0.3s; }
-.combination-card:nth-child(4) { animation-delay: 0.4s; }
-
-/* 🔥 ローディング状態 */
-.combination-card.loading {
-  opacity: 0.7;
-  pointer-events: none;
-}
-
-.combination-card.loading .select-button {
-  background: #d1d5db;
-  cursor: not-allowed;
-}
-
-/* 🔥 アクセシビリティ */
-.select-button:focus {
-  outline: 3px solid rgba(99, 102, 241, 0.5);
-  outline-offset: 2px;
-}
-
-.combination-card:focus-within {
-  border-color: #6366f1;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }

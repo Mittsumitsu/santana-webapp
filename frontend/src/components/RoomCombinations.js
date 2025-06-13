@@ -1,230 +1,185 @@
-// frontend/src/components/RoomCombinations.js - 検索結果表示コンポーネント修正版
 import React from 'react';
 import './RoomCombinations.css';
 
-const RoomCombinations = ({ combinations, onSelect, searchParams }) => {
-  
-  // 🔥 デバッグ情報出力
-  console.log('🔥 RoomCombinations レンダリング:', {
-    combinations: combinations,
-    combinationsLength: combinations?.length || 0,
-    searchParams: searchParams
+const RoomCombinations = ({ combinations, loading, error, onBooking, searchParams }) => {
+  // ローディング中
+  if (loading) {
+    return (
+      <div className="room-combinations">
+        <div className="loading">検索中...</div>
+      </div>
+    );
+  }
+
+  // エラー時
+  if (error) {
+    return (
+      <div className="room-combinations">
+        <div className="error">{error}</div>
+      </div>
+    );
+  }
+
+  // 結果なし
+  if (!combinations || combinations.length === 0) {
+    return (
+      <div className="room-combinations">
+        <div className="no-results">
+          条件に一致する部屋の組み合わせが見つかりませんでした。
+          <br />検索条件を変更してみてください。
+        </div>
+      </div>
+    );
+  }
+
+  // 部屋名を正規化する関数（修正版）
+  const normalizeRoomName = (name) => {
+    if (!name) return '';
+    // 「(2室)」「（2室）」のみ削除、「+ 部屋名」は残す
+    return name.replace(/\s*[\(（][0-9]+室[\)）]\s*/g, '').trim();
+  };
+
+  // 予約ボタンのハンドラ
+  const handleBooking = (combination) => {
+    if (onBooking) {
+      onBooking(combination);
+    } else {
+      console.log('予約データ:', combination);
+      alert('予約システムは開発中です。');
+    }
+  };
+
+  // 詳細表示のハンドラ
+  const handleDetails = (combination) => {
+    const details = `部屋詳細:\n${normalizeRoomName(combination.description)}\n\n合計料金: ₹${combination.total_price.toLocaleString()}`;
+    alert(details);
+  };
+
+  // 🔥 デバッグ: combinationsデータの中身を確認
+  console.log('🔥 RoomCombinations - 受信したcombinations:', combinations);
+  combinations.forEach((combo, index) => {
+    console.log(`🔥 組み合わせ ${index + 1}:`, {
+      description: combo.description,
+      rooms: combo.rooms,
+      roomsLength: combo.rooms?.length,
+      roomNames: combo.rooms?.map(r => r.name),
+      completeData: combo
+    });
   });
 
-  // 🔥 入力データ検証
-  if (!combinations || !Array.isArray(combinations)) {
-    console.error('🔥 RoomCombinations: 無効なcombinationsデータ:', combinations);
-    return (
-      <div className="room-combinations-error">
-        <p>部屋データの読み込みに問題があります。</p>
-      </div>
-    );
-  }
-
-  if (combinations.length === 0) {
-    return (
-      <div className="room-combinations-empty">
-        <h3>😔 利用可能な部屋が見つかりませんでした</h3>
-        <p>検索条件を変更してもう一度お試しください。</p>
-      </div>
-    );
-  }
-
-  // 🔥 宿泊日数計算
-  const calculateNights = () => {
-    if (!searchParams?.checkIn || !searchParams?.checkOut) return 1;
-    
-    const start = new Date(searchParams.checkIn);
-    const end = new Date(searchParams.checkOut);
-    const nights = Math.floor((end - start) / (1000 * 60 * 60 * 24));
-    return nights > 0 ? nights : 1;
-  };
-
-  const nights = calculateNights();
-
-  // 🔥 価格フォーマット関数
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      minimumFractionDigits: 0
-    }).format(price);
-  };
-
-  // 🔥 部屋タイプアイコン取得
-  const getRoomTypeIcon = (roomType) => {
-    const iconMap = {
-      'dormitory': '🛏️',
-      'single': '🏠',
-      'deluxe': '✨', 
-      'twin': '🏠',
-      'male_dormitory': '👨',
-      'female_dormitory': '👩'
-    };
-    
-    // 部屋名に基づく判定
-    if (roomType.includes('男性ドミトリー')) return '👨';
-    if (roomType.includes('女性ドミトリー')) return '👩';
-    if (roomType.includes('ドミトリー')) return '🛏️';
-    if (roomType.includes('シングル')) return '🏠';
-    if (roomType.includes('デラックス')) return '✨';
-    if (roomType.includes('ツイン')) return '🏠';
-    
-    return '🏠';
-  };
-
-  // 🔥 おすすめバッジ判定
-  const getRecommendationBadge = (combination, index) => {
-    if (index === 0) return { text: '最もおすすめ', class: 'most-recommended' };
-    if (combination.total_price <= 800) return { text: 'コスパ良好', class: 'cost-effective' };
-    if (combination.description?.includes('デラックス')) return { text: 'プレミアム', class: 'premium' };
-    return null;
-  };
-
-  // 🔥 各組み合わせカードをレンダリング
-  const renderCombinationCard = (combination, index) => {
-    console.log(`🔥 カード ${index + 1} レンダリング:`, combination);
-
-    const recommendation = getRecommendationBadge(combination, index);
-    const totalPrice = combination.total_price * nights;
-
-    return (
-      <div key={index} className={`combination-card ${index === 0 ? 'recommended' : ''}`}>
-        {recommendation && (
-          <div className={`recommendation-badge ${recommendation.class}`}>
-            {recommendation.text}
-          </div>
-        )}
-
-        <div className="card-header">
-          <div className="room-type-info">
-            <h3 className="room-type-title">
-              {getRoomTypeIcon(combination.description)} 
-              {combination.description}
-            </h3>
-            <p className="room-type-subtitle">{combination.rooms?.length || 1}室プラン</p>
-          </div>
-          
-          <div className="pricing-info">
-            <div className="price-main">
-              {formatPrice(combination.total_price)}
-            </div>
-            <div className="price-details">
-              1人あたり ₹{combination.total_price}/泊
-            </div>
-          </div>
-        </div>
-
-        <div className="card-body">
-          {/* 🔥 部屋詳細情報 */}
-          <div className="room-details">
-            {combination.rooms && combination.rooms.length > 0 ? (
-              combination.rooms.map((room, roomIndex) => (
-                <div key={roomIndex} className="room-detail-item">
-                  <span className="room-icon">{getRoomTypeIcon(room.name)}</span>
-                  <div className="room-info">
-                    <div className="room-name">{room.name}</div>
-                    <div className="room-capacity">定員: {room.capacity}名</div>
-                    {room.gender_restriction && room.gender_restriction !== 'none' && (
-                      <div className="gender-restriction">
-                        {room.gender_restriction === 'male' ? '男性専用' : '女性専用'}
-                      </div>
-                    )}
-                  </div>
-                  <div className="room-price">₹{room.current_price}</div>
-                </div>
-              ))
-            ) : (
-              <div className="room-detail-item">
-                <span className="room-icon">{getRoomTypeIcon(combination.description)}</span>
-                <div className="room-info">
-                  <div className="room-name">{combination.description}</div>
-                  <div className="room-capacity">1名用</div>
-                </div>
-                <div className="room-price">₹{combination.total_price}</div>
-              </div>
-            )}
-          </div>
-
-          {/* 🔥 宿泊日数が2泊以上の場合の料金詳細 */}
-          {nights > 1 && (
-            <div className="pricing-breakdown">
-              <div className="pricing-row">
-                <span>1泊料金:</span>
-                <span>{formatPrice(combination.total_price)}</span>
-              </div>
-              <div className="pricing-row">
-                <span>宿泊日数:</span>
-                <span>{nights}泊</span>
-              </div>
-              <div className="pricing-row total">
-                <span>合計料金:</span>
-                <span className="total-price">{formatPrice(totalPrice)}</span>
-              </div>
-            </div>
-          )}
-
-          {/* 🔥 ゲスト詳細 */}
-          {searchParams && (
-            <div className="guest-info">
-              <div className="guest-breakdown">
-                <span>👥 ゲスト:</span>
-                {parseInt(searchParams.maleGuests) > 0 && (
-                  <span>男性 {searchParams.maleGuests}名</span>
-                )}
-                {parseInt(searchParams.femaleGuests) > 0 && (
-                  <span>女性 {searchParams.femaleGuests}名</span>
-                )}
-                <span className="total-guests">合計 {searchParams.totalGuests}名</span>
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div className="card-footer">
-          <button 
-            className="select-button"
-            onClick={() => {
-              console.log('🔥 組み合わせ選択:', combination);
-              onSelect(combination);
-            }}
-          >
-            この部屋を予約する
-          </button>
-          
-          <div className="card-features">
-            <span className="feature-item">✅ 即時予約可能</span>
-            <span className="feature-item">🔄 キャンセル無料</span>
-            {combination.total_price <= 1000 && (
-              <span className="feature-item">💰 格安料金</span>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   return (
-    <div className="room-combinations-container">
-      <div className="combinations-grid">
-        {combinations.map((combination, index) => renderCombinationCard(combination, index))}
+    <div className="room-combinations">
+      {/* 検索結果ヘッダー - 1つだけ表示 */}
+      <div className="results-header">
+        <h2 className="results-title">空室検索結果</h2>
+        <div className="results-count">
+          {combinations.length}個の宿泊プランが見つかりました
+        </div>
       </div>
-      
-      {/* 🔥 検索結果サマリー */}
-      <div className="search-summary-footer">
-        <p className="summary-text">
-          {combinations.length}つの宿泊プランが見つかりました
-          {searchParams && (
-            <>
-              <span className="separator">•</span>
-              {searchParams.checkIn} 〜 {searchParams.checkOut}
-              <span className="separator">•</span>
-              {searchParams.totalGuests}名
-              <span className="separator">•</span>
-              {nights}泊
-            </>
-          )}
-        </p>
+
+      {/* 組み合わせリスト */}
+      <div className="combinations-list">
+        {combinations.map((combination, index) => {
+          // 🔥 デバッグ: 各組み合わせの詳細ログ
+          console.log(`🔥 カード ${index + 1} レンダリング開始:`, combination);
+          console.log(`🔥 カード ${index + 1} - rooms:`, combination.rooms);
+          
+          return (
+            <div key={`combination-${index}`} className="combination-card">
+              {/* ヘッダー部分 */}
+              <div className="combination-header">
+                <div className="combination-title">
+                  <h3>{normalizeRoomName(combination.description)}</h3>
+                  <div className="combination-type">
+                    {combination.rooms ? combination.rooms.length : 1}室プラン
+                  </div>
+                </div>
+
+                {/* 価格情報 */}
+                <div className="combination-price">
+                  <div className="total-price">₹{combination.total_price.toLocaleString()}</div>
+                  <div className="price-per-person">
+                    1人あたり ₹{Math.round(combination.total_price / (searchParams?.totalGuests || 1)).toLocaleString()}/泊
+                  </div>
+                </div>
+              </div>
+
+              {/* 部屋詳細 - 強制的に全部屋表示版 */}
+              <div className="rooms-detail">
+                {(() => {
+                  // 🔥 デバッグ: combination.roomsの詳細確認
+                  console.log(`🔥 カード ${index + 1} - rooms詳細処理開始`);
+                  console.log(`🔥 カード ${index + 1} - combination.rooms存在チェック:`, !!combination.rooms);
+                  console.log(`🔥 カード ${index + 1} - combination.rooms配列チェック:`, Array.isArray(combination.rooms));
+                  console.log(`🔥 カード ${index + 1} - combination.rooms長さ:`, combination.rooms?.length);
+                  
+                  if (combination.rooms && Array.isArray(combination.rooms) && combination.rooms.length > 0) {
+                    console.log(`🔥 カード ${index + 1} - 部屋配列を処理中:`, combination.rooms);
+                    return combination.rooms.map((room, roomIndex) => {
+                      console.log(`🔥 カード ${index + 1} - 部屋 ${roomIndex + 1}:`, room);
+                      return (
+                        <div key={`room-${room.id || roomIndex}-${roomIndex}`} className="room-item">
+                          <div className="room-info">
+                            <span className="room-name">{normalizeRoomName(room.name || '不明')}</span>
+                          </div>
+                          
+                          <div className="room-price">
+                            ₹{(room.current_price || 0).toLocaleString()}/泊
+                          </div>
+                        </div>
+                      );
+                    });
+                  } else {
+                    console.log(`🔥 カード ${index + 1} - フォールバック表示`);
+                    return (
+                      <div className="room-item">
+                        <div className="room-info">
+                          <span className="room-name">{normalizeRoomName(combination.description)}</span>
+                        </div>
+                        
+                        <div className="room-price">
+                          ₹{combination.total_price.toLocaleString()}/泊
+                        </div>
+                      </div>
+                    );
+                  }
+                })()}
+              </div>
+
+              {/* 特徴表示 - シンプル版 */}
+              <div className="combination-features">
+                {combination.total_price <= 1000 && (
+                  <div className="cost-effective">
+                    <span>コスパ良好</span>
+                  </div>
+                )}
+              </div>
+
+              {/* アクションボタン */}
+              <div className="combination-actions">
+                <button 
+                  className="detail-btn" 
+                  onClick={() => handleDetails(combination)}
+                >
+                  詳細を見る
+                </button>
+                <button 
+                  className="book-btn" 
+                  onClick={() => handleBooking(combination)}
+                >
+                  予約する
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* フッター情報 */}
+      <div className="results-footer">
+        <div className="help-text">
+          ご質問がございましたら、お気軽にお問い合わせください。
+        </div>
       </div>
     </div>
   );
