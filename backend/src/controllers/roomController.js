@@ -82,7 +82,7 @@ const checkRoomAvailability = async (roomId, checkInDate, checkOutDate) => {
         .collection('availability')
         .where('room_id', '==', roomId)
         .where('date', '==', date)
-        .where('status', '==', 'booked')
+        .where('status', '!=', 'available')
         .get();
       
       if (!availabilitySnapshot.empty) {
@@ -1197,4 +1197,5 @@ module.exports = {
   createRoom,
   updateRoom,
   deleteRoom,
+  checkRoomAvailability
 };
