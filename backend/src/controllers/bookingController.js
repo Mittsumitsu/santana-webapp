@@ -240,9 +240,12 @@ exports.createBooking = async (req, res) => {
           room_name: roomData.name,
           check_in_time: room.check_in_time || '14:00',
           number_of_guests: room.guests.length,
-          primary_guest: room.guests[0],
+          primary_guest: {
+            name_romaji: room.guests[0].name_romaji,
+            gender: room.guests[0].gender
+          },
           additional_guests: room.guests.slice(1),
-          room_amount: room.price,
+          room_amount: room.room_amount || room.price,
           // 予約時点の部屋情報スナップショット
           room_snapshot: {
             room_type_id: roomData.room_type_id,
@@ -277,7 +280,7 @@ exports.createBooking = async (req, res) => {
       status: 'confirmed',
       total_guests: rooms.reduce((total, room) => total + room.guests.length, 0),
       primary_contact,
-      total_amount: rooms.reduce((total, room) => total + room.price, 0),
+      total_amount: rooms.reduce((total, room) => total + (room.room_amount || room.price), 0),
       
       // 🎯 部屋タイプ情報を含む統合予約の部屋情報
       rooms: enrichedRooms,
@@ -292,6 +295,163 @@ exports.createBooking = async (req, res) => {
 
     // Firestoreに保存
     await db.collection('bookings').doc(newBookingId).set(unifiedBookingData);
+
+    // 🎯 Phase 3.3対応: 予約作成後にavailabilityを更新（ドミトリー対応版）
+    console.log('🔥 Phase 3.3 availability更新開始（ドミトリー対応）...');
+    const dateRange = getDateRange(check_in_date, check_out_date);
+    
+    for (const room of enrichedRooms) {
+      // 部屋タイプを確認
+      const roomType = room.room_snapshot.room_type_id;
+      const isDormitory = roomType === 'dormitory';
+      const guestCount = room.number_of_guests;
+      
+      console.log(`🔥 部屋処理: ${room.room_id} (${roomType}, ${guestCount}名)`);
+      
+      for (const date of dateRange) {
+        const docId = `${room.room_id}_${date}`;
+        console.log(`🔥 availability更新: ${docId}`);
+        
+        const docRef = db.collection('availability').doc(docId);
+        const docSnap = await docRef.get();
+        
+        if (isDormitory) {
+          // 🏠 ドミトリーの場合: 部分的予約管理
+          if (docSnap.exists) {
+            const existingData = docSnap.data();
+            const currentOccupancy = existingData.dormitory_info?.current_occupancy || 0;
+            const newOccupancy = currentOccupancy + guestCount;
+            const capacity = room.room_snapshot.capacity;
+            
+            console.log(`🏠 ドミトリー更新: ${currentOccupancy} + ${guestCount} = ${newOccupancy}/${capacity}`);
+            
+            // ドミトリー情報を更新
+            await docRef.update({
+              'dormitory_info.current_occupancy': newOccupancy,
+              'dormitory_info.remaining_capacity': capacity - newOccupancy,
+              'dormitory_info.bookings': admin.firestore.FieldValue.arrayUnion({
+                booking_id: newBookingId,
+                guest_count: guestCount,
+                primary_guest: room.primary_guest.name_romaji,
+                gender: room.primary_guest.gender,
+                created_at: new Date().toISOString()
+              }),
+              // ステータス判定
+              status: newOccupancy >= capacity ? 'booked' : 'partial',
+              'status_info.code': newOccupancy >= capacity ? 'booked' : 'partial',
+              'status_info.name': newOccupancy >= capacity ? '満室' : '部分予約',
+              'status_info.bookable': newOccupancy < capacity,
+              'status_info.customer_visible': true,
+              'status_info.staff_visible': true,
+              'status_info.color': newOccupancy >= capacity ? '#dc3545' : '#ffc107',
+              'status_info.icon': newOccupancy >= capacity ? '❌' : '🔺',
+              updated_at: admin.firestore.FieldValue.serverTimestamp(),
+            });
+          } else {
+            // 新規ドミトリー予約
+            const capacity = room.room_snapshot.capacity;
+            const isFullyBooked = guestCount >= capacity;
+            
+            console.log(`🏠 ドミトリー新規: ${guestCount}/${capacity}`);
+            
+            await docRef.set({
+              room_id: room.room_id,
+              date: date,
+              status: isFullyBooked ? 'booked' : 'partial',
+              
+              // ドミトリー専用情報
+              dormitory_info: {
+                current_occupancy: guestCount,
+                remaining_capacity: capacity - guestCount,
+                total_capacity: capacity,
+                bookings: [{
+                  booking_id: newBookingId,
+                  guest_count: guestCount,
+                  primary_guest: room.primary_guest.name_romaji,
+                  gender: room.primary_guest.gender,
+                  created_at: new Date().toISOString()
+                }]
+              },
+              
+              // Phase 3.3拡張フィールド
+              status_info: {
+                code: isFullyBooked ? 'booked' : 'partial',
+                name: isFullyBooked ? '満室' : '部分予約',
+                customer_visible: true,
+                staff_visible: true,
+                bookable: !isFullyBooked,
+                color: isFullyBooked ? '#dc3545' : '#ffc107',
+                icon: isFullyBooked ? '❌' : '🔺'
+              },
+              
+              customer_visible: true,
+              staff_notes: `ドミトリー予約 ${guestCount}名`,
+              booking_type: 'dormitory',
+              
+              created_at: admin.firestore.FieldValue.serverTimestamp(),
+              updated_at: admin.firestore.FieldValue.serverTimestamp(),
+              migration_version: '1.0'
+            });
+          }
+          console.log(`✅ ドミトリー availability更新: ${docId}`);
+          
+        } else {
+          // 🚪 個室の場合: 従来の完全予約管理
+          const availabilityData = {
+            room_id: room.room_id,
+            date: date,
+            status: 'booked',
+            booking_id: newBookingId,
+            
+            // 🆕 Phase 3.3拡張フィールド
+            status_info: {
+              code: 'booked',
+              name: '通常予約',
+              customer_visible: false,  // お客様には非表示
+              staff_visible: true,      // スタッフに表示
+              bookable: false,          // 予約不可
+              color: '#dc3545',
+              icon: '🔴'
+            },
+            
+            customer_visible: false,    // お客様向け表示フラグ
+            staff_notes: `予約ID: ${newBookingId}`,
+            booking_type: 'normal',     // 予約種別
+            
+            // メタデータ
+            created_at: admin.firestore.FieldValue.serverTimestamp(),
+            updated_at: admin.firestore.FieldValue.serverTimestamp(),
+            migration_version: '1.0'
+          };
+          
+          if (docSnap.exists) {
+            // 既存があればupdate（既存の拡張フィールドを保持しつつ更新）
+            await docRef.update({
+              status: 'booked',
+              booking_id: newBookingId,
+              'status_info.code': 'booked',
+              'status_info.name': '通常予約',
+              'status_info.customer_visible': false,
+              'status_info.staff_visible': true,
+              'status_info.bookable': false,
+              'status_info.color': '#dc3545',
+              'status_info.icon': '🔴',
+              customer_visible: false,
+              staff_notes: `予約ID: ${newBookingId}`,
+              booking_type: 'normal',
+              updated_at: admin.firestore.FieldValue.serverTimestamp(),
+            });
+            console.log(`✅ 個室 availability更新(update): ${docId}`);
+          } else {
+            // なければ新規作成（完全な拡張構造で作成）
+            await docRef.set(availabilityData);
+            console.log(`✅ 個室 availability新規作成(set): ${docId}`);
+          }
+        }
+      }
+    }
+    
+    console.log('✅ Phase 3.3 availability更新完了');
 
     console.log('✅ 新IDシステム予約作成成功:', newBookingId);
     console.log('🏨 保存された部屋タイプ:', enrichedRooms.map(r => `${r.room_id}:${r.room_type_id}`));
@@ -385,6 +545,112 @@ exports.cancelBooking = async (req, res) => {
     if (!bookingDoc.exists) {
       return res.status(404).json({ error: '予約が見つかりません' });
     }
+
+    const bookingData = bookingDoc.data();
+    
+    // 🎯 Phase 3.3対応: キャンセル時にavailabilityを空室に戻す（ドミトリー対応）
+    console.log('🔥 キャンセル時availability更新開始（ドミトリー対応）...');
+    const dateRange = getDateRange(bookingData.check_in_date, bookingData.check_out_date);
+    
+    for (const room of bookingData.rooms) {
+      const roomType = room.room_snapshot?.room_type_id;
+      const isDormitory = roomType === 'dormitory';
+      const guestCount = room.number_of_guests;
+      
+      console.log(`🔥 キャンセル処理: ${room.room_id} (${roomType}, ${guestCount}名)`);
+      
+      for (const date of dateRange) {
+        const docId = `${room.room_id}_${date}`;
+        console.log(`🔥 availability復元: ${docId}`);
+        
+        const docRef = db.collection('availability').doc(docId);
+        const docSnap = await docRef.get();
+        
+        if (docSnap.exists) {
+          const availabilityDoc = docSnap.data();
+          
+          if (isDormitory) {
+            // 🏠 ドミトリーの場合: 部分的キャンセル処理
+            const dormitoryInfo = availabilityDoc.dormitory_info;
+            if (dormitoryInfo) {
+              // 該当予約を削除
+              const updatedBookings = dormitoryInfo.bookings.filter(
+                booking => booking.booking_id !== bookingId
+              );
+              
+              // 新しい占有数を計算
+              const newOccupancy = updatedBookings.reduce((sum, booking) => sum + booking.guest_count, 0);
+              const capacity = dormitoryInfo.total_capacity;
+              
+              console.log(`🏠 ドミトリーキャンセル: ${dormitoryInfo.current_occupancy} - ${guestCount} = ${newOccupancy}/${capacity}`);
+              
+              if (newOccupancy === 0) {
+                // 完全に空室になる場合
+                await docRef.update({
+                  status: 'available',
+                  'dormitory_info.current_occupancy': 0,
+                  'dormitory_info.remaining_capacity': capacity,
+                  'dormitory_info.bookings': [],
+                  'status_info.code': 'available',
+                  'status_info.name': '空室',
+                  'status_info.customer_visible': true,
+                  'status_info.staff_visible': true,
+                  'status_info.bookable': true,
+                  'status_info.color': '#28a745',
+                  'status_info.icon': '⭕️',
+                  customer_visible: true,
+                  staff_notes: `ドミトリー完全空室 (キャンセル: ${bookingId})`,
+                  updated_at: admin.firestore.FieldValue.serverTimestamp(),
+                });
+              } else {
+                // 部分的にキャンセル
+                await docRef.update({
+                  status: 'partial',
+                  'dormitory_info.current_occupancy': newOccupancy,
+                  'dormitory_info.remaining_capacity': capacity - newOccupancy,
+                  'dormitory_info.bookings': updatedBookings,
+                  'status_info.code': 'partial',
+                  'status_info.name': '部分予約',
+                  'status_info.customer_visible': true,
+                  'status_info.staff_visible': true,
+                  'status_info.bookable': true,
+                  'status_info.color': '#ffc107',
+                  'status_info.icon': '🔺',
+                  customer_visible: true,
+                  staff_notes: `ドミトリー部分キャンセル ${newOccupancy}/${capacity} (キャンセル: ${bookingId})`,
+                  updated_at: admin.firestore.FieldValue.serverTimestamp(),
+                });
+              }
+              console.log(`✅ ドミトリー availability復元: ${docId}`);
+            }
+          } else {
+            // 🚪 個室の場合: 従来の完全キャンセル処理
+            if (availabilityDoc.booking_id === bookingId) {
+              await docRef.update({
+                status: 'available',
+                booking_id: null,
+                'status_info.code': 'available',
+                'status_info.name': '空室',
+                'status_info.customer_visible': true,
+                'status_info.staff_visible': true,
+                'status_info.bookable': true,
+                'status_info.color': '#28a745',
+                'status_info.icon': '⭕️',
+                customer_visible: true,
+                staff_notes: `キャンセル済み (元予約: ${bookingId})`,
+                booking_type: 'none',
+                updated_at: admin.firestore.FieldValue.serverTimestamp(),
+              });
+              console.log(`✅ 個室 availability復元: ${docId}`);
+            } else {
+              console.log(`⚠️ booking_id不一致: ${docId} (expected: ${bookingId}, actual: ${availabilityDoc.booking_id})`);
+            }
+          }
+        }
+      }
+    }
+    
+    console.log('✅ キャンセル時availability更新完了');
 
     // ステータスをキャンセルに更新
     await bookingRef.update({
@@ -555,4 +821,17 @@ function generateNewBookingId() {
     result += chars.charAt(Math.floor(Math.random() * chars.length));
   }
   return result;
+}
+
+// 🔍 日付範囲を配列として取得するユーティリティ関数（roomController.jsから複製）
+function getDateRange(startDate, endDate) {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const dateArray = [];
+  let currentDate = new Date(start);
+  while (currentDate < end) {
+    dateArray.push(currentDate.toISOString().split('T')[0]);
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+  return dateArray;
 }

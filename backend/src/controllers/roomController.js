@@ -62,36 +62,96 @@ function getDateRange(startDate, endDate) {
 }
 
 /**
- * 指定期間中の部屋の空室状況をチェック
+ * 指定期間中の部屋の空室状況をチェック（ドミトリー対応版）
  * @param {string} roomId - 部屋ID
  * @param {string} checkInDate - チェックイン日
  * @param {string} checkOutDate - チェックアウト日
+ * @param {number} requestedGuests - 希望ゲスト数
+ * @param {Object} roomData - 部屋データ（容量情報含む）
  * @returns {boolean} 利用可能かどうか
  */
-const checkRoomAvailability = async (roomId, checkInDate, checkOutDate) => {
+const checkRoomAvailability = async (roomId, checkInDate, checkOutDate, requestedGuests = 1, roomData = null) => {
   try {
-    console.log(`🔍 空室チェック: ${roomId}, ${checkInDate} - ${checkOutDate}`);
+    console.log(`🔍 空室チェック: ${roomId}, ${checkInDate} - ${checkOutDate}, ${requestedGuests}名希望`);
     
     // チェック対象の日付範囲を生成
     const dateRange = getDateRange(checkInDate, checkOutDate);
     console.log(`  対象日付: ${dateRange.join(', ')}`);
     
-    // 該当期間中の予約状況をチェック
+    // 部屋タイプを確認
+    const isDormitory = roomData?.room_type_id === 'dormitory';
+    console.log(`  部屋タイプ: ${roomData?.room_type_id} (ドミトリー: ${isDormitory})`);
+    
+    // 該当期間中の予約状況をチェック（Phase 3.3拡張構造 + ドミトリー対応）
     for (const date of dateRange) {
       const availabilitySnapshot = await db
         .collection('availability')
         .where('room_id', '==', roomId)
         .where('date', '==', date)
-        .where('status', '!=', 'available')
         .get();
       
-      if (!availabilitySnapshot.empty) {
-        console.log(`  ❌ ${roomId}は${date}に予約済み`);
-        return false; // 一つでも予約があれば利用不可
+      if (availabilitySnapshot.empty) {
+        // availability情報がない場合は利用可能
+        console.log(`  ✅ ${roomId}は${date}にavailability未登録（利用可能）`);
+        continue;
+      }
+      
+      // 予約状況をチェック
+      for (const doc of availabilitySnapshot.docs) {
+        const availabilityData = doc.data();
+        
+        if (isDormitory) {
+          // 🏠 ドミトリーの場合: 残り容量チェック
+          const dormitoryInfo = availabilityData.dormitory_info;
+          
+          if (availabilityData.status === 'available') {
+            // 完全空室の場合は利用可能
+            console.log(`  ✅ ${roomId}は${date}に完全空室（ドミトリー）`);
+            continue;
+          }
+          
+          if (availabilityData.status === 'partial' && dormitoryInfo) {
+            // 部分予約の場合は残り容量チェック
+            const remainingCapacity = dormitoryInfo.remaining_capacity || 0;
+            const currentOccupancy = dormitoryInfo.current_occupancy || 0;
+            const totalCapacity = dormitoryInfo.total_capacity || roomData?.capacity || 6;
+            
+            console.log(`  🏠 ${roomId}は${date}に部分予約: ${currentOccupancy}/${totalCapacity}名, 残り${remainingCapacity}名`);
+            
+            if (remainingCapacity >= requestedGuests) {
+              console.log(`  ✅ ${roomId}は${date}に容量あり（${requestedGuests}名希望, ${remainingCapacity}名空き）`);
+              continue;
+            } else {
+              console.log(`  ❌ ${roomId}は${date}に容量不足（${requestedGuests}名希望, ${remainingCapacity}名空きのみ）`);
+              return false;
+            }
+          }
+          
+          if (availabilityData.status === 'booked') {
+            // 満室の場合は利用不可
+            console.log(`  ❌ ${roomId}は${date}にドミトリー満室`);
+            return false;
+          }
+          
+        } else {
+          // 🚪 個室の場合: 従来のロジック
+          
+          // Phase 3.3対応: status_info.bookable フィールドでチェック
+          if (availabilityData.status_info?.bookable === false) {
+            console.log(`  ❌ ${roomId}は${date}に予約不可 (${availabilityData.status_info.name})`);
+            return false;
+          }
+          
+          // フォールバック: 従来のstatusフィールドでもチェック
+          if (availabilityData.status !== 'available') {
+            console.log(`  ❌ ${roomId}は${date}に予約済み (status: ${availabilityData.status})`);
+            return false;
+          }
+        }
       }
     }
     
-    console.log(`  ✅ ${roomId}は指定期間中利用可能`);
+    console.log(`  ✅ ${roomId}は指定期間中利用可能（${requestedGuests}名）`);
     return true; // すべての日付で利用可能
   } catch (error) {
     console.error(`空室チェックエラー (${roomId}):`, error);
@@ -1012,17 +1072,41 @@ const getAvailableRooms = async (req, res) => {
       });
     }
 
-    // 🔥 【新機能】空室状況チェック
-    console.log('\n🔍 空室状況チェック開始...');
+    // 🔥 【新機能】空室状況チェック（ドミトリー対応）
+    console.log('\n🔍 空室状況チェック開始（ドミトリー対応）...');
     const availableRooms = [];
     
     for (const room of roomsByLocation) {
-      const isAvailable = await checkRoomAvailability(room.id, checkIn, checkOut);
+      // ドミトリーの場合は希望ゲスト数を考慮
+      const isDormitory = room.room_type_id === 'dormitory';
+      let requestedGuests = totalCount;
+      
+      // ドミトリーでない場合や、混合グループの場合は1として扱う
+      if (!isDormitory) {
+        requestedGuests = 1; // 個室は人数関係なく1室として判定
+      } else if (maleCount > 0 && femaleCount > 0) {
+        // 男女混合の場合、各ドミトリーを該当性別の人数でチェック
+        if (room.gender_restriction === 'male') {
+          requestedGuests = maleCount; // 男性専用ドミトリーは男性人数のみ
+          console.log(`🔍 男性専用ドミトリー: ${maleCount}名の男性をチェック`);
+        } else if (room.gender_restriction === 'female') {
+          requestedGuests = femaleCount; // 女性専用ドミトリーは女性人数のみ
+          console.log(`🔍 女性専用ドミトリー: ${femaleCount}名の女性をチェック`);
+        } else {
+          // 性別制限なしの場合、同性の多い方の人数を使用
+          requestedGuests = Math.max(maleCount, femaleCount);
+          console.log(`🔍 性別制限なしドミトリー: ${requestedGuests}名をチェック`);
+        }
+      }
+      
+      console.log(`🔍 ${room.name}(${room.id}): タイプ=${room.room_type_id}, 希望=${requestedGuests}名, 容量=${room.capacity}`);
+      
+      const isAvailable = await checkRoomAvailability(room.id, checkIn, checkOut, requestedGuests, room);
       if (isAvailable) {
         availableRooms.push(room);
-        console.log(`✅ ${room.name}(${room.id}) - 利用可能`);
+        console.log(`✅ ${room.name}(${room.id}) - 利用可能（${requestedGuests}名）`);
       } else {
-        console.log(`❌ ${room.name}(${room.id}) - 予約済み`);
+        console.log(`❌ ${room.name}(${room.id}) - 利用不可（${requestedGuests}名希望）`);
       }
     }
 
