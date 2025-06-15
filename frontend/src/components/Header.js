@@ -116,6 +116,7 @@ const Header = () => {
           <nav className="nav-menu">
             <ul className="nav-links">
               <li><a href="/">ホーム</a></li>
+              <li><a href="/availability">空室カレンダー</a></li>
               <li><a href="/about">施設案内</a></li>
               <li><a href="/contact">お問い合わせ</a></li>
             </ul>

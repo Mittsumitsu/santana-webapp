@@ -1,16 +1,43 @@
 // frontend/src/components/SearchForm.js - 完全リセット・ネイティブ版
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import './SearchForm.css';
 
 const SearchForm = ({ onSearch, loading }) => {
+  const [searchParams] = useSearchParams();
+  
+  // 🗓️ URLパラメータから初期値を取得
+  const initializeFromURL = () => {
+    const urlCheckin = searchParams.get('checkin');
+    const urlCheckout = searchParams.get('checkout');
+    const urlLocation = searchParams.get('location');
+    const urlMales = parseInt(searchParams.get('males')) || 0;
+    const urlFemales = parseInt(searchParams.get('females')) || 0;
+    const isFromCalendar = searchParams.get('calendar') === 'true';
+    
+    return {
+      checkIn: urlCheckin || '',
+      checkOut: urlCheckout || '',
+      location: urlLocation || 'delhi',
+      maleGuests: urlMales,
+      femaleGuests: urlFemales,
+      isFromCalendar
+    };
+  };
+  
+  const initialValues = initializeFromURL();
+  
   // シンプルなstate管理
-  const [checkIn, setCheckIn] = useState('');
-  const [checkOut, setCheckOut] = useState('');
-  const [maleGuests, setMaleGuests] = useState(0);
-  const [femaleGuests, setFemaleGuests] = useState(0);
-  const [location, setLocation] = useState('delhi');
+  const [checkIn, setCheckIn] = useState(initialValues.checkIn);
+  const [checkOut, setCheckOut] = useState(initialValues.checkOut);
+  const [maleGuests, setMaleGuests] = useState(initialValues.maleGuests);
+  const [femaleGuests, setFemaleGuests] = useState(initialValues.femaleGuests);
+  const [location, setLocation] = useState(initialValues.location);
   // デフォルト値も24:00に変更
   const [checkInTime, setCheckInTime] = useState('14:00');
+  
+  // 🗓️ カレンダーからのアクセス通知
+  const [isFromCalendar, setIsFromCalendar] = useState(initialValues.isFromCalendar);
 
   // チェックイン時間の選択肢
   const timeOptions = [
@@ -99,9 +126,26 @@ const SearchForm = ({ onSearch, loading }) => {
     console.log('🔍 検索パラメータ送信:', searchParams);
     onSearch(searchParams);
   };
+  
+  // 🗓️ カレンダーからの場合は自動検索を無効化（手動で人数入力後に検索）
+  // useEffect(() => {
+  //   if (isFromCalendar && checkIn && checkOut && (maleGuests > 0 || femaleGuests > 0)) {
+  //     console.log('🗓️ カレンダーからの自動検索実行');
+  //     handleSubmit({ preventDefault: () => {} });
+  //     setIsFromCalendar(false); // 一度だけ実行
+  //   }
+  // }, [isFromCalendar, checkIn, checkOut, maleGuests, femaleGuests]);
 
   return (
     <form onSubmit={handleSubmit} className="search-form-clean">
+      {/* 🗓️ カレンダーからのアクセス表示 */}
+      {initialValues.isFromCalendar && (
+        <div className="calendar-notice">
+          <span className="calendar-icon">📅</span>
+          <span>空室カレンダーから予約日が設定されました</span>
+        </div>
+      )}
+      
       <div className="search-container-clean">
         
         {/* 日程セクション */}

@@ -1,4 +1,4 @@
-/* BookingForm.css - バリデーション機能追加版 */
+/* BookingForm.css - バリデーション機能追加版 + 空室カレンダー対応 */
 
 .booking-form-container {
     max-width: 900px;
@@ -7,6 +7,107 @@
     background: white;
     border-radius: 15px;
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+  }
+
+  /* 🗓️ 空室カレンダーからの予約情報表示 */
+  .calendar-booking-info {
+    background: linear-gradient(135deg, #e3f2fd, #f1f8e9);
+    border: 2px solid #2196f3;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 30px;
+    box-shadow: 0 3px 10px rgba(33, 150, 243, 0.1);
+  }
+
+  .calendar-details h2 {
+    margin: 0 0 15px 0;
+    color: #1976d2;
+    font-size: 1.4rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .calendar-params {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+  }
+
+  .param-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(33, 150, 243, 0.2);
+  }
+
+  .param-label {
+    font-weight: 600;
+    color: #1565c0;
+    font-size: 0.9rem;
+  }
+
+  .param-value {
+    color: #1976d2;
+    font-weight: 500;
+    font-size: 1rem;
+  }
+
+  .calendar-note {
+    margin: 0;
+    color: #388e3c;
+    font-style: italic;
+    font-size: 0.95rem;
+    background: rgba(76, 175, 80, 0.1);
+    padding: 10px;
+    border-radius: 6px;
+    border-left: 4px solid #4caf50;
+  }
+
+  /* 検索リダイレクトセクション */
+  .calendar-search-redirect {
+    background: white;
+    border: 2px solid #ff9800;
+    border-radius: 12px;
+    padding: 25px;
+    text-align: center;
+    margin-top: 20px;
+  }
+
+  .calendar-search-redirect h3 {
+    color: #f57c00;
+    margin: 0 0 15px 0;
+    font-size: 1.3rem;
+  }
+
+  .calendar-search-redirect p {
+    color: #5d4037;
+    margin: 0 0 20px 0;
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  .search-redirect-button {
+    background: linear-gradient(135deg, #ff9800, #f57c00);
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 3px 10px rgba(255, 152, 0, 0.3);
+  }
+
+  .search-redirect-button:hover {
+    background: linear-gradient(135deg, #f57c00, #ef6c00);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4);
   }
   
   .booking-form-container h2 {

@@ -10,6 +10,7 @@ import Booking from './pages/Booking';
 import BookingSuccess from './pages/BookingSuccess';
 import UserDashboard from './pages/UserDashboard';
 import AdminDashboard from './pages/AdminDashboard';
+import AvailabilityCalendar from './pages/AvailabilityCalendar';
 import './App.css';
 
 // 📧 認証状態に応じたバナー表示コンポーネント
@@ -57,6 +58,9 @@ function App() {
               <Route path="/booking" element={<Booking />} />
               <Route path="/booking/:roomId" element={<Booking />} />
               <Route path="/booking-success" element={<BookingSuccess />} />
+              
+              {/* 空室カレンダー */}
+              <Route path="/availability" element={<AvailabilityCalendar />} />
               
               {/* ユーザーダッシュボード */}
               <Route path="/dashboard" element={<UserDashboard />} />

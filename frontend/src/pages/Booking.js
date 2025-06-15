@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import BookingForm from '../components/BookingForm';
 import { createBooking } from '../api';
 import './Booking.css';
@@ -7,17 +7,30 @@ import './Booking.css';
 const Booking = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const bookingData = location.state;
+
+  // 🗓️ 空室カレンダーからのURLパラメータを取得
+  const calendarLocation = searchParams.get('location');
+  const calendarCheckin = searchParams.get('checkin');
+  
+  console.log('🗓️ 空室カレンダーからのパラメータ:', { 
+    location: calendarLocation, 
+    checkin: calendarCheckin 
+  });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
 
-  // bookingDataがない場合はホームページにリダイレクト
+  // 🗓️ 空室カレンダーからのアクセスか通常の予約フローかをチェック
+  const isFromCalendar = calendarLocation && calendarCheckin;
+  
+  // bookingDataがない かつ 空室カレンダーからでもない場合はホームページにリダイレクト
   React.useEffect(() => {
-    if (!bookingData) {
+    if (!bookingData && !isFromCalendar) {
       navigate('/');
     }
-  }, [bookingData, navigate]);
+  }, [bookingData, isFromCalendar, navigate]);
 
   // 宿泊日数を計算
   const calculateNights = (checkIn, checkOut) => {
@@ -33,10 +46,10 @@ const Booking = () => {
     if (!bookingData?.combination) return { basePrice: 1700, totalPrice: 1700, nights: 1 };
     
     const combination = bookingData.combination;
-    const searchParams = bookingData.searchParams;
+    const bookingSearchParams = bookingData.searchParams;
     
     // 宿泊日数
-    const nights = calculateNights(searchParams.checkIn, searchParams.checkOut);
+    const nights = calculateNights(bookingSearchParams.checkIn, bookingSearchParams.checkOut);
     
     // 🔥 重要: combination.total_price は1泊分の料金として扱う
     const basePrice = combination.total_price; // 1泊分
@@ -135,11 +148,37 @@ const Booking = () => {
     navigate(-1);
   };
 
+  // 🗓️ 空室カレンダーからのアクセス時のダミー関数
+  const handleCalendarSubmit = async (formData) => {
+    console.log('🗓️ 空室カレンダーからの予約は検索ページ経由で行います');
+  };
+
+  // 🗓️ 空室カレンダーからのアクセス時の処理
+  if (!bookingData && isFromCalendar) {
+    return (
+      <div className="booking-container">
+        <div className="calendar-booking-header">
+          <h1>予約フォーム</h1>
+          <p className="calendar-info">
+            📅 {calendarCheckin} の予約を開始します
+          </p>
+        </div>
+        <BookingForm 
+          onSubmit={handleCalendarSubmit}
+          isSubmitting={isSubmitting}
+          initialLocation={calendarLocation}
+          initialCheckin={calendarCheckin}
+          fromCalendar={true}
+        />
+      </div>
+    );
+  }
+
   if (!bookingData) {
     return <div className="loading">予約情報を読み込み中...</div>;
   }
 
-  const { combination, searchParams } = bookingData;
+  const { combination, searchParams: bookingSearchParams } = bookingData;
   
   // 🔥 表示用の正しい料金計算
   const pricing = calculateCorrectPricing();
@@ -175,11 +214,11 @@ const Booking = () => {
           </div>
           <div className="summary-item">
             <span className="summary-label">チェックイン:</span>
-            <span className="summary-value">{new Date(searchParams.checkIn).toLocaleDateString('ja-JP')}</span>
+            <span className="summary-value">{new Date(bookingSearchParams.checkIn).toLocaleDateString('ja-JP')}</span>
           </div>
           <div className="summary-item">
             <span className="summary-label">チェックアウト:</span>
-            <span className="summary-value">{new Date(searchParams.checkOut).toLocaleDateString('ja-JP')}</span>
+            <span className="summary-value">{new Date(bookingSearchParams.checkOut).toLocaleDateString('ja-JP')}</span>
           </div>
           <div className="summary-item">
             <span className="summary-label">宿泊日数:</span>

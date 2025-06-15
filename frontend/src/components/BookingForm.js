@@ -2,10 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import '../styles/BookingForm.css';
 
-const BookingForm = ({ bookingData, onSubmit, loading }) => {
+const BookingForm = ({ 
+  bookingData, 
+  onSubmit, 
+  loading, 
+  isSubmitting,
+  initialLocation, 
+  initialCheckin, 
+  fromCalendar = false 
+}) => {
   // 🎯 認証情報を正しく取得
   const { getUserId, getUserData, currentUser } = useAuth();
   
+  // ここでuseStateをすべて宣言
   const [formData, setFormData] = useState({
     primaryContact: {
       lastName: '',
@@ -23,21 +32,24 @@ const BookingForm = ({ bookingData, onSubmit, loading }) => {
     saveUserData: true,
     autoFillEnabled: true
   });
-
   const [formError, setFormError] = useState(null);
   const [validationErrors, setValidationErrors] = useState({});
-  
-  // 🆕 新機能: プロフィール管理状態
   const [savedUserProfiles, setSavedUserProfiles] = useState([]);
   const [isLoadingUserData, setIsLoadingUserData] = useState(false);
   const [showProfileSelector, setShowProfileSelector] = useState(false);
-
+  const [savedGuestInfo, setSavedGuestInfo] = useState(null);
+  
   // 🆕 新機能: 保存済みプロフィールを取得
   const fetchSavedUserProfiles = async (userId) => {
     try {
       const response = await fetch(`/api/users/${userId}/profiles`);
       if (response.ok) {
-        return await response.json();
+        const profiles = await response.json();
+        // プロフィールがあれば、最初のもののguestInfoをセット
+        if (profiles.length > 0 && profiles[0].guestInfo) {
+          setSavedGuestInfo(profiles[0].guestInfo);
+        }
+        return profiles;
       }
       return [];
     } catch (error) {
@@ -142,6 +154,28 @@ const BookingForm = ({ bookingData, onSubmit, loading }) => {
 
     loadUserData();
   }, [getUserId, getUserData, currentUser]);
+
+  // 🗓️ 空室カレンダーからの初期値設定
+  useEffect(() => {
+    if (fromCalendar && initialLocation && initialCheckin) {
+      console.log('🗓️ 空室カレンダーからの初期値設定:', {
+        location: initialLocation,
+        checkin: initialCheckin
+      });
+      
+      // チェックアウト日を翌日に自動設定
+      const checkinDate = new Date(initialCheckin);
+      const checkoutDate = new Date(checkinDate);
+      checkoutDate.setDate(checkoutDate.getDate() + 1);
+      
+      // フォーム上部に表示用の情報を設定
+      window.calendarInitialData = {
+        location: initialLocation,
+        checkin: initialCheckin,
+        checkout: checkoutDate.toISOString().split('T')[0]
+      };
+    }
+  }, [fromCalendar, initialLocation, initialCheckin]);
 
   // bookingDataが変更されたときに初期化
   useEffect(() => {
@@ -396,8 +430,13 @@ const BookingForm = ({ bookingData, onSubmit, loading }) => {
     });
 
     // APIに送信するデータ形式に変換
+    const guestInfo = {
+      primaryContact: formData.primaryContact,
+      roomGuests: formData.roomGuests
+    };
+
     const submitData = {
-      user_id: userId, // 🔥 新IDシステムのユーザーIDを使用
+      user_id: userId,
       check_in_date: bookingData.searchParams.checkIn,
       check_out_date: bookingData.searchParams.checkOut,
       primary_contact: {
@@ -418,13 +457,74 @@ const BookingForm = ({ bookingData, onSubmit, loading }) => {
           price: allocation.room_price
         };
       }),
-      notes: formData.notes
+      notes: formData.notes,
+      searchParams: bookingData.searchParams,
+      guestInfo,
     };
 
     console.log('🎯 送信データ:', submitData);
     onSubmit(submitData);
   };
 
+  // サーバーから取得したguestInfoがあれば自動入力
+  useEffect(() => {
+    if (savedGuestInfo) {
+      setFormData(prev => ({
+        ...prev,
+        primaryContact: savedGuestInfo.primaryContact || prev.primaryContact,
+        roomGuests: savedGuestInfo.roomGuests || prev.roomGuests
+      }));
+    }
+  }, [savedGuestInfo]);
+
+  // 🗓️ 空室カレンダーからの場合と通常の予約フローを分離
+  if (fromCalendar) {
+    // 空室カレンダーからの場合は、検索フォームを表示
+    return (
+      <div className="booking-form-container">
+        {/* 🗓️ 空室カレンダーからの場合の表示 */}
+        <div className="calendar-booking-info">
+          <div className="calendar-details">
+            <h2>📅 空室カレンダーからの予約</h2>
+            <div className="calendar-params">
+              <div className="param-item">
+                <span className="param-label">店舗:</span>
+                <span className="param-value">
+                  {initialLocation === 'delhi' ? 'デリー' : 
+                   initialLocation === 'varanasi' ? 'バラナシ' : 
+                   initialLocation === 'puri' ? 'プリー' : initialLocation}
+                </span>
+              </div>
+              <div className="param-item">
+                <span className="param-label">チェックイン:</span>
+                <span className="param-value">{initialCheckin}</span>
+              </div>
+            </div>
+            <p className="calendar-note">
+              こちらの日程で部屋を検索してください
+            </p>
+          </div>
+        </div>
+        
+        <div className="calendar-search-redirect">
+          <h3>部屋検索に進む</h3>
+          <p>詳細な条件を入力して部屋を検索し、予約を完了してください。</p>
+          <button 
+            type="button"
+            className="search-redirect-button"
+            onClick={() => {
+              const searchUrl = `/?location=${initialLocation}&checkin=${initialCheckin}`;
+              window.location.href = searchUrl;
+            }}
+          >
+            🔍 部屋検索ページに進む
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // bookingDataがない場合の早期リターン
   if (!bookingData) {
     return <div className="loading">予約データを読み込み中...</div>;
   }
